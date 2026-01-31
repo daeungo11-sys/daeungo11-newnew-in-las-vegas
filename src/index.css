@@ -9,6 +9,7 @@
   --color-indigo: #4f46e5;
   --color-indigo-soft: #eef2ff;
   --color-green-soft: #e6f7ee;
+  --color-green: #22c55e;
 }
 
 * {
@@ -20,6 +21,10 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: 'Inter', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 button,
