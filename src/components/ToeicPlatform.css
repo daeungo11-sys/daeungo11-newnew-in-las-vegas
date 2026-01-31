@@ -324,6 +324,17 @@
   line-height: 1.7;
 }
 
+.compare-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.7;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+}
+
 .highlight-word {
   position: relative;
   display: inline-flex;

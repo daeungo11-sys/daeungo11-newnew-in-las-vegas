@@ -51,6 +51,8 @@ function ToeicPlatform() {
   const [editorError, setEditorError] = useState('');
   const [editorSubmitting, setEditorSubmitting] = useState(false);
 
+  const [compareInput, setCompareInput] = useState('');
+
   const [activeTooltip, setActiveTooltip] = useState('');
 
   const weaknessText = useMemo(() => {
@@ -615,39 +617,45 @@ Keep it concise and actionable.`;
           </div>
           <div className="compare-body">
             <div className="compare-panel">
-              <p className="compare-text">
-                I&apos;m sorry to tell you that the meeting is delayed.
-              </p>
+              <textarea
+                className="compare-input"
+                placeholder="여기에 문장을 입력하세요..."
+                value={compareInput}
+                onChange={(event) => setCompareInput(event.target.value)}
+                rows={6}
+              />
             </div>
             <div className="compare-panel">
               <p className="compare-text">
-                {aiSentenceParts.map((part, index) => {
-                  if (!part.highlight) {
-                    return <span key={index}>{part.text}</span>;
-                  }
-                  const isActive = activeTooltip === part.text;
-                  return (
-                    <span
-                      key={index}
-                      className={`highlight-word ${isActive ? 'active' : ''}`}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() =>
-                        setActiveTooltip(isActive ? '' : part.text)
+                {compareInput.trim()
+                  ? aiSentenceParts.map((part, index) => {
+                      if (!part.highlight) {
+                        return <span key={index}>{part.text}</span>;
                       }
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          setActiveTooltip(isActive ? '' : part.text);
-                        }
-                      }}
-                    >
-                      {part.text}
-                      {isActive && (
-                        <span className="tooltip">{part.tooltip}</span>
-                      )}
-                    </span>
-                  );
-                })}
+                      const isActive = activeTooltip === part.text;
+                      return (
+                        <span
+                          key={index}
+                          className={`highlight-word ${isActive ? 'active' : ''}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() =>
+                            setActiveTooltip(isActive ? '' : part.text)
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              setActiveTooltip(isActive ? '' : part.text);
+                            }
+                          }}
+                        >
+                          {part.text}
+                          {isActive && (
+                            <span className="tooltip">{part.tooltip}</span>
+                          )}
+                        </span>
+                      );
+                    })
+                  : '내 문장을 입력하면 AI 추천 문장이 표시됩니다.'}
               </p>
             </div>
           </div>
