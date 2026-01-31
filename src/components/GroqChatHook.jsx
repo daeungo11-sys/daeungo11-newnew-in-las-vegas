@@ -17,7 +17,7 @@ function GroqChatHook() {
     sendStreamMessage,
     clearMessages,
   } = useGroqChat({
-    model: 'llama-3.1-70b-versatile',
+    model: 'llama-3.1-70b',
     temperature: 0.7,
   });
 

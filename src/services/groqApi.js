@@ -15,7 +15,7 @@ const groq = new Groq({
 export async function chatCompletion(messages, options = {}) {
   try {
     const {
-      model = 'llama-3.1-70b-versatile',
+      model = 'llama-3.1-70b',
       temperature = 0.7,
       max_tokens = 1024,
       stream = false,
@@ -47,7 +47,7 @@ export async function chatCompletion(messages, options = {}) {
 export async function streamChatCompletion(messages, onChunk, options = {}) {
   try {
     const {
-      model = 'llama-3.1-70b-versatile',
+      model = 'llama-3.1-70b',
       temperature = 0.7,
       max_tokens = 1024,
       ...otherOptions

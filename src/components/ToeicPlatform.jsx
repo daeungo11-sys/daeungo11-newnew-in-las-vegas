@@ -71,7 +71,7 @@ Sentence: "${paraphraseInput.trim()}"`;
 
     try {
       const text = await generateText(prompt, {
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-70b',
         temperature: 0.4,
         max_tokens: 600,
       });
@@ -125,7 +125,7 @@ Keep it concise and actionable.`;
 
     try {
       const text = await generateText(prompt, {
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-70b',
         temperature: 0.5,
         max_tokens: 900,
       });

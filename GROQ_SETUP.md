@@ -62,7 +62,7 @@ function App() {
 
 Groq에서 제공하는 주요 모델:
 
-- `llama-3.1-70b-versatile` (기본값) - 범용 모델
+- `llama-3.1-70b` (기본값) - 범용 모델
 - `llama-3.1-8b-instant` - 빠른 응답
 - `mixtral-8x7b-32768` - 긴 컨텍스트 지원
 - `gemma-7b-it` - 대화형 모델
@@ -71,7 +71,7 @@ Groq에서 제공하는 주요 모델:
 
 ```javascript
 await chatCompletion(messages, {
-  model: 'llama-3.1-70b-versatile',
+  model: 'llama-3.1-70b',
   temperature: 0.7,        // 0.0 ~ 2.0 (창의성 조절)
   max_tokens: 1024,        // 최대 토큰 수
   top_p: 1.0,              // 토큰 선택 범위

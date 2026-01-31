@@ -25,7 +25,7 @@ function GroqChat() {
 
     try {
       const response = await chatCompletion(newMessages, {
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-70b',
         temperature: 0.7,
         max_tokens: 1024,
       });
@@ -69,7 +69,7 @@ function GroqChat() {
           setStreamingMessage((prev) => prev + chunk);
         },
         {
-          model: 'llama-3.1-70b-versatile',
+          model: 'llama-3.1-70b',
           temperature: 0.7,
           max_tokens: 1024,
         }

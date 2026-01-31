@@ -12,7 +12,7 @@ export function useGroqChat(options = {}) {
   const [error, setError] = useState(null);
 
   const defaultOptions = {
-    model: 'llama-3.1-70b-versatile',
+    model: 'llama-3.1-70b',
     temperature: 0.7,
     max_tokens: 1024,
     ...options,
