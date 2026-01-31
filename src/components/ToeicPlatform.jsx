@@ -47,6 +47,10 @@ function ToeicPlatform() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
 
+  const [editorText, setEditorText] = useState('');
+  const [editorError, setEditorError] = useState('');
+  const [editorSubmitting, setEditorSubmitting] = useState(false);
+
   const [activeTooltip, setActiveTooltip] = useState('');
 
   const weaknessText = useMemo(() => {
@@ -230,6 +234,45 @@ Keep it concise and actionable.`;
   ];
 
   const errorColors = ['#4f46e5', '#7c83f1', '#7dd3a6', '#c7d2fe'];
+
+  const requiredPhrases = [
+    'Due to unforeseen circumstances',
+    'We would like to inform you that',
+    'Please note that the schedule has been revised',
+  ];
+
+  const editorLength = editorText.trim().length;
+  const requiredUsed = requiredPhrases.filter((phrase) =>
+    editorText.toLowerCase().includes(phrase.toLowerCase())
+  ).length;
+  const progressPercent = Math.min(Math.round((editorLength / 180) * 100), 100);
+
+  const handleEditorSubmit = async () => {
+    if (editorSubmitting) return;
+    if (!editorText.trim()) {
+      setEditorError('작성한 문장이 없어요. 내용을 입력해주세요.');
+      return;
+    }
+
+    setEditorSubmitting(true);
+    setEditorError('');
+    try {
+      if (!studentId) {
+        throw new Error('학생 ID가 없습니다.');
+      }
+
+      await saveStudentHistory(studentId, {
+        activityType: 'WRITING_SUBMISSION',
+        inputText: editorText.trim(),
+        outputText: editorText.trim(),
+      });
+    } catch (error) {
+      console.error('Writing Submit Error:', error);
+      setEditorError('제출에 실패했어요. 학생 ID를 확인해주세요.');
+    } finally {
+      setEditorSubmitting(false);
+    }
+  };
 
   return (
     <div className="toeic-platform">
@@ -528,17 +571,28 @@ Keep it concise and actionable.`;
                 className="clean-editor"
                 placeholder="여기에 문장을 작성하세요..."
                 rows={10}
+                value={editorText}
+                onChange={(event) => setEditorText(event.target.value)}
               />
               <div className="editor-footer">
                 <div className="progress-info">
-                  <span>현재 글자 수: 128 / 180</span>
-                  <span>필수 표현 사용: 1 / 3</span>
+                  <span>현재 글자 수: {editorLength} / 180</span>
+                  <span>필수 표현 사용: {requiredUsed} / 3</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill" />
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
-                <button type="button" className="submit-btn">
-                  제출하기
+                {editorError && <p className="error-text">{editorError}</p>}
+                <button
+                  type="button"
+                  className="submit-btn"
+                  onClick={handleEditorSubmit}
+                  disabled={editorSubmitting}
+                >
+                  {editorSubmitting ? '제출 중...' : '제출하기'}
                 </button>
               </div>
             </div>

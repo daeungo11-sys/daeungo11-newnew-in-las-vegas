@@ -31,6 +31,7 @@
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
     "prisma": "^6.16.1",
+    "supabase": "^2.74.4",
     "vite": "^5.2.0"
   }
 }
