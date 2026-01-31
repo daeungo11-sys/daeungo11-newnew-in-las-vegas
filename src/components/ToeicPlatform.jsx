@@ -251,17 +251,17 @@ Keep it concise and actionable.`;
       <div className="view-toggle">
         <button
           type="button"
-          className={activeView === 'student' ? 'active' : ''}
-          onClick={() => setActiveView('student')}
-        >
-          학생 화면
-        </button>
-        <button
-          type="button"
           className={activeView === 'teacher' ? 'active' : ''}
           onClick={() => setActiveView('teacher')}
         >
-          강사 화면
+          강사
+        </button>
+        <button
+          type="button"
+          className={activeView === 'student' ? 'active' : ''}
+          onClick={() => setActiveView('student')}
+        >
+          학생
         </button>
       </div>
 

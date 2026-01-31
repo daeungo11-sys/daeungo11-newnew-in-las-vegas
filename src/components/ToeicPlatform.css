@@ -48,20 +48,22 @@
 .view-toggle {
   max-width: 960px;
   margin: 0 auto 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 160px));
+  gap: 12px;
+  justify-content: center;
 }
 
 .view-toggle button {
   background: #fff;
   border: 1px solid var(--color-border);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   color: var(--color-muted);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
 }
 
 .view-toggle button.active {
