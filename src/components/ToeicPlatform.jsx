@@ -56,6 +56,7 @@ function ToeicPlatform() {
   const [compareInput, setCompareInput] = useState('');
 
   const [activeTooltip, setActiveTooltip] = useState('');
+  const [activeSection, setActiveSection] = useState('history');
 
   const weaknessText = useMemo(() => {
     if (selectedWeaknesses.length === 0) {
@@ -79,6 +80,22 @@ function ToeicPlatform() {
       return 'Supabase student_activities 테이블이 없어요. SQL Editor에서 테이블을 생성해주세요.';
     }
     return fallbackMessage;
+  };
+
+  const sectionNav = [
+    { id: 'history', label: '학습 히스토리' },
+    { id: 'paraphrase', label: 'Paraphrasing Training' },
+    { id: 'summary', label: '학습 지문 요약' },
+    { id: 'compare', label: 'Paraphrasing Diff View' },
+    { id: 'review', label: '수업 후 반복 학습+개인별 약점 보완' },
+  ];
+
+  const handleSectionNav = (id) => {
+    const target = document.getElementById(`section-${id}`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveSection(id);
+    }
   };
 
   const handleParaphraseSubmit = async (e) => {
@@ -344,7 +361,7 @@ Keep it concise and actionable.`;
 
       {activeView === 'teacher' && (
         <>
-          <section className="platform-section">
+          <section id="section-history" className="platform-section">
             <div className="section-header">
               <h2>학급 요약 대시보드</h2>
               <p>제출률과 평균 점수, 주요 오류를 한눈에 확인하세요.</p>
@@ -464,6 +481,19 @@ Keep it concise and actionable.`;
 
       {activeView === 'student' && (
         <>
+          <div className="section-nav">
+            {sectionNav.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeSection === item.id ? 'active' : ''}
+                onClick={() => handleSectionNav(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           <section className="platform-section">
             <div className="section-header">
               <h2>내 학습 히스토리</h2>
@@ -536,7 +566,7 @@ Keep it concise and actionable.`;
             </div>
           </section>
 
-      <section className="platform-section">
+      <section id="section-paraphrase" className="platform-section">
         <div className="section-header">
           <h2>Step 1. 토익 패러프레이징 훈련</h2>
           <p>
@@ -567,7 +597,7 @@ Keep it concise and actionable.`;
         </form>
       </section>
 
-      <section className="platform-section">
+      <section id="section-summary" className="platform-section">
         <div className="section-header">
           <h2>Step 1-2. 학습 지문 요약 & 영작 에디터</h2>
           <p>
@@ -636,7 +666,7 @@ Keep it concise and actionable.`;
         </div>
       </section>
 
-      <section className="platform-section">
+      <section id="section-compare" className="platform-section">
         <div className="section-header">
           <h2>코드 비교형 패러프레이징 뷰</h2>
           <p>
@@ -696,7 +726,7 @@ Keep it concise and actionable.`;
         </div>
       </section>
 
-      <section className="platform-section">
+      <section id="section-review" className="platform-section">
         <div className="section-header">
           <h2>Step 2. 수업 후 반복 학습 + 개인별 약점 보완</h2>
           <p>
