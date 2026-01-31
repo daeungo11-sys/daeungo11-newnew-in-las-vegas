@@ -31,6 +31,8 @@ function ToeicPlatform() {
   const [studentError, setStudentError] = useState('');
   const [studentLoading, setStudentLoading] = useState(false);
   const [activeView, setActiveView] = useState('student');
+  const [entryName, setEntryName] = useState('');
+  const [entryId, setEntryId] = useState('');
 
   const [paraphraseInput, setParaphraseInput] = useState('');
   const [paraphraseOutput, setParaphraseOutput] = useState('');
@@ -80,6 +82,20 @@ function ToeicPlatform() {
       return 'Supabase student_activities 테이블이 없어요. SQL Editor에서 테이블을 생성해주세요.';
     }
     return fallbackMessage;
+  };
+
+  const handleEnter = () => {
+    const name = entryName.trim();
+    const id = entryId.trim();
+
+    if (!name || !id) {
+      setStudentError('이름과 학생 ID를 모두 입력해주세요.');
+      return;
+    }
+
+    setStudentError('');
+    setStudentName(name);
+    setStudentId(id);
   };
 
   const sectionNav = [
@@ -324,6 +340,55 @@ Keep it concise and actionable.`;
       setEditorSubmitting(false);
     }
   };
+
+  const hasAccess = Boolean(studentName.trim() && studentId.trim());
+
+  if (!hasAccess) {
+    return (
+      <div className="toeic-platform">
+        <header className="platform-hero">
+          <div className="hero-content">
+            <h1>TOEIC Paraphrasing & Review Platform</h1>
+            <p>내 학습 히스토리를 불러오기 위해 이름과 학생 ID를 입력하세요.</p>
+          </div>
+          <div className="hero-badges">
+            <span>학습 히스토리</span>
+            <span>TOEIC 훈련</span>
+            <span>개인 맞춤 복습</span>
+          </div>
+        </header>
+
+        <section className="platform-section">
+          <div className="card entry-card">
+            <div className="section-header">
+              <h2>내 학습 히스토리</h2>
+              <p>이름과 학생 ID를 입력하면 본 페이지로 이동합니다.</p>
+            </div>
+            <label htmlFor="entry-name">이름</label>
+            <input
+              id="entry-name"
+              type="text"
+              value={entryName}
+              onChange={(e) => setEntryName(e.target.value)}
+              placeholder="예: 홍길동"
+            />
+            <label htmlFor="entry-id">학생 ID</label>
+            <input
+              id="entry-id"
+              type="text"
+              value={entryId}
+              onChange={(e) => setEntryId(e.target.value.toUpperCase())}
+              placeholder="예: 42AB"
+            />
+            {studentError && <p className="error-text">{studentError}</p>}
+            <button type="button" onClick={handleEnter}>
+              내 학습 시작하기
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="toeic-platform">
