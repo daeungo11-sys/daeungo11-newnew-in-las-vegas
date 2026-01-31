@@ -1,11 +1,9 @@
 import React from 'react';
-import GroqChat from './components/GroqChat';
+import ToeicPlatform from './components/ToeicPlatform';
 
 function App() {
   return (
-    <div>
-      <GroqChat />
-    </div>
+    <ToeicPlatform />
   );
 }
 

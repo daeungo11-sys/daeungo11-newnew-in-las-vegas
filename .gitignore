@@ -30,9 +30,12 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-# Vercel
-.vercel
-
 # Prisma SQLite
 prisma/*.db
 prisma/*.db-journal
+
+# Local npm cache
+.npm-cache/
+
+# Vercel
+.vercel

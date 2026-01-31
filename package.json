@@ -17,10 +17,14 @@
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
+    "effect": "^3.19.15",
+    "es-toolkit": "^1.44.0",
     "express": "^4.21.2",
+    "fast-check": "^4.5.3",
     "groq-sdk": "^0.7.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

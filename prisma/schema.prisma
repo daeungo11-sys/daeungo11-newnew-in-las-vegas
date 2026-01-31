@@ -7,69 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Classroom {
-  id        String    @id @default(cuid())
-  name      String
-  term      String?
-  createdAt DateTime  @default(now())
-  students  Student[]
-  essays    Essay[]
-}
-
 model Student {
-  id          String   @id @default(cuid())
-  name        String
-  email       String?  @unique
-  classroomId String
-  createdAt   DateTime @default(now())
-
-  classroom Classroom @relation(fields: [classroomId], references: [id])
-  essays    Essay[]
+  id         String            @id @default(cuid())
+  name       String
+  email      String?           @unique
+  createdAt  DateTime          @default(now())
+  activities StudentActivity[]
 }
 
-model Essay {
-  id          String    @id @default(cuid())
-  studentId   String
-  classroomId String
-  title       String?
-  content     String
-  submittedAt DateTime  @default(now())
+model StudentActivity {
+  id           String       @id @default(cuid())
+  studentId    String
+  activityType ActivityType
+  inputText    String
+  outputText   String
+  createdAt    DateTime     @default(now())
 
-  student   Student       @relation(fields: [studentId], references: [id])
-  classroom Classroom     @relation(fields: [classroomId], references: [id])
-  analysis  EssayAnalysis?
-  errors    EssayError[]
+  student Student @relation(fields: [studentId], references: [id])
 
-  @@index([classroomId, submittedAt])
+  @@index([studentId, createdAt])
 }
 
-model EssayAnalysis {
-  id           String   @id @default(cuid())
-  essayId      String   @unique
-  grammarScore Int
-  vocabScore   Int
-  toeicScore   Int
-  summary      String?
-  createdAt    DateTime @default(now())
-
-  essay Essay @relation(fields: [essayId], references: [id])
-}
-
-model ErrorCategory {
-  id     String      @id @default(cuid())
-  code   String      @unique
-  name   String
-  errors EssayError[]
-}
-
-model EssayError {
-  id         String @id @default(cuid())
-  essayId    String
-  categoryId String
-  count      Int    @default(1)
-
-  essay    Essay         @relation(fields: [essayId], references: [id])
-  category ErrorCategory @relation(fields: [categoryId], references: [id])
-
-  @@unique([essayId, categoryId])
+enum ActivityType {
+  PARAPHRASE
+  PRACTICE_PLAN
 }
