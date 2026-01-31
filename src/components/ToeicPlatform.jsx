@@ -44,6 +44,8 @@ function ToeicPlatform() {
   const [findLoading, setFindLoading] = useState(false);
   const [findError, setFindError] = useState('');
   const [showFindModal, setShowFindModal] = useState(false);
+  const [reissueLoading, setReissueLoading] = useState(false);
+  const [reissueMessage, setReissueMessage] = useState('');
 
   const [paraphraseInput, setParaphraseInput] = useState('');
   const [paraphraseOutput, setParaphraseOutput] = useState('');
@@ -222,6 +224,7 @@ function ToeicPlatform() {
     setFindError('');
     setFindName('');
     setShowFindModal(false);
+    setReissueMessage('');
   };
 
   const sectionNav = [
@@ -269,6 +272,27 @@ function ToeicPlatform() {
       setFindError('학생 ID 조회에 실패했어요. 잠시 후 다시 시도해주세요.');
     } finally {
       setFindLoading(false);
+    }
+  };
+
+  const isLegacyId = (id) => !/^\d{2}[A-Z]{2}$/.test(id);
+
+  const handleReissueId = async (name) => {
+    if (reissueLoading) return;
+    setReissueLoading(true);
+    setReissueMessage('');
+    try {
+      const student = await createStudent({ name });
+      if (!student?.id) {
+        throw new Error('학생 ID 재발급에 실패했어요.');
+      }
+      setEntryId(student.id);
+      setReissueMessage(`새 학생 ID가 발급되었어요: ${student.id}`);
+    } catch (error) {
+      console.error('Reissue Student Error:', error);
+      setReissueMessage('학생 ID 재발급에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setReissueLoading(false);
     }
   };
 
@@ -668,16 +692,34 @@ ${historySummary}`;
                   <div className="result-box">
                     <h3>조회 결과</h3>
                     <ul className="result-list">
-                      {findResults.map((item) => (
-                        <li key={item.id}>
-                          <span>{item.name}</span>
-                          <strong>{item.id}</strong>
-                        </li>
-                      ))}
+                      {findResults.map((item) => {
+                        const legacy = isLegacyId(item.id);
+                        return (
+                          <li key={item.id}>
+                            <span>{item.name}</span>
+                            <strong className={legacy ? 'legacy-id' : ''}>
+                              {item.id}
+                            </strong>
+                            {legacy && (
+                              <button
+                                type="button"
+                                className="ghost-btn"
+                                onClick={() => handleReissueId(item.name)}
+                                disabled={reissueLoading}
+                              >
+                                {reissueLoading ? '발급 중...' : '새 ID 발급'}
+                              </button>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                     <p className="hint-text">
                       찾은 ID를 복사해서 입력 후 시작하세요.
                     </p>
+                    {reissueMessage && (
+                      <p className="success-text">{reissueMessage}</p>
+                    )}
                   </div>
                 )}
               </div>
