@@ -79,6 +79,29 @@
   margin-bottom: 6px;
 }
 
+.entry-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.entry-toggle button {
+  flex: 1;
+  border: 1px solid #dbe2ff;
+  background: #fff;
+  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.entry-toggle button.active {
+  border-color: var(--color-indigo);
+  color: var(--color-indigo);
+  background: var(--color-indigo-soft);
+}
+
 .platform-section {
   max-width: 960px;
   margin: 0 auto 36px;
@@ -932,6 +955,39 @@
   .progress-info {
     flex-direction: column;
     gap: 4px;
+  }
+
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+
+  .view-toggle,
+  .section-nav {
+    justify-content: center;
+  }
+
+  .compare-header,
+  .compare-body {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-card {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1024px) {
+  .platform-hero,
+  .card {
+    padding: 26px;
+  }
+
+  .study-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 
   .chart-row {

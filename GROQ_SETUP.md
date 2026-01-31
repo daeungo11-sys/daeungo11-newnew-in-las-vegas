@@ -63,7 +63,6 @@ function App() {
 Groq에서 제공하는 주요 모델:
 
 - `llama-3.1-8b-instant` (기본값) - 빠른 응답
-- `llama-3.1-8b-instant` - 빠른 응답
 - `mixtral-8x7b-32768` - 긴 컨텍스트 지원
 - `gemma-7b-it` - 대화형 모델
 

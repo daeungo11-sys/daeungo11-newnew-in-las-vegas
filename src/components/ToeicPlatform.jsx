@@ -39,6 +39,8 @@ function ToeicPlatform() {
   const [activeView, setActiveView] = useState('student');
   const [entryName, setEntryName] = useState('');
   const [entryId, setEntryId] = useState('');
+  const [entryMode, setEntryMode] = useState('login');
+  const [entryMessage, setEntryMessage] = useState('');
   const [findName, setFindName] = useState('');
   const [findResults, setFindResults] = useState([]);
   const [findLoading, setFindLoading] = useState(false);
@@ -207,6 +209,31 @@ function ToeicPlatform() {
       });
   };
 
+  const handleEntryCreate = async () => {
+    if (studentLoading) return;
+    const name = entryName.trim();
+    if (!name) {
+      setStudentError('이름을 입력해주세요.');
+      return;
+    }
+    setStudentLoading(true);
+    setStudentError('');
+    setEntryMessage('');
+    try {
+      const student = await createStudent({ name });
+      if (!student?.id) {
+        throw new Error('학생 ID 생성에 실패했어요.');
+      }
+      setEntryId(student.id);
+      setEntryMessage(`학생 ID가 발급되었어요: ${student.id}`);
+    } catch (error) {
+      console.error('Entry Create Error:', error);
+      setStudentError('학생 ID 생성에 실패했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setStudentLoading(false);
+    }
+  };
+
   const handleGoHome = () => {
     setStudentName('');
     setStudentId('');
@@ -225,6 +252,8 @@ function ToeicPlatform() {
     setFindName('');
     setShowFindModal(false);
     setReissueMessage('');
+    setEntryMode('login');
+    setEntryMessage('');
   };
 
   const sectionNav = [
@@ -286,11 +315,16 @@ function ToeicPlatform() {
       if (!student?.id) {
         throw new Error('학생 ID 재발급에 실패했어요.');
       }
+      if (isLegacyId(student.id)) {
+        throw new Error('새 ID 형식이 올바르지 않아요.');
+      }
       setEntryId(student.id);
       setReissueMessage(`새 학생 ID가 발급되었어요: ${student.id}`);
     } catch (error) {
       console.error('Reissue Student Error:', error);
-      setReissueMessage('학생 ID 재발급에 실패했어요. 다시 시도해주세요.');
+      setReissueMessage(
+        '학생 ID 재발급에 실패했어요. create-student 함수를 최신으로 배포해주세요.'
+      );
     } finally {
       setReissueLoading(false);
     }
@@ -633,6 +667,22 @@ ${historySummary}`;
               <h2>내 학습 히스토리</h2>
               <p>이름과 학생 ID를 입력하면 본 페이지로 이동합니다.</p>
             </div>
+            <div className="entry-toggle">
+              <button
+                type="button"
+                className={entryMode === 'login' ? 'active' : ''}
+                onClick={() => setEntryMode('login')}
+              >
+                로그인
+              </button>
+              <button
+                type="button"
+                className={entryMode === 'signup' ? 'active' : ''}
+                onClick={() => setEntryMode('signup')}
+              >
+                신규 가입
+              </button>
+            </div>
             <label htmlFor="entry-name">이름</label>
             <input
               id="entry-name"
@@ -641,18 +691,39 @@ ${historySummary}`;
               onChange={(e) => setEntryName(e.target.value)}
               placeholder="예: 홍길동"
             />
-            <label htmlFor="entry-id">학생 ID</label>
-            <input
-              id="entry-id"
-              type="text"
-              value={entryId}
-              onChange={(e) => setEntryId(e.target.value.toUpperCase())}
-              placeholder="예: 42AB"
-            />
+            {entryMode === 'login' ? (
+              <>
+                <label htmlFor="entry-id">학생 ID</label>
+                <input
+                  id="entry-id"
+                  type="text"
+                  value={entryId}
+                  onChange={(e) => setEntryId(e.target.value.toUpperCase())}
+                  placeholder="예: 42AB"
+                />
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleEntryCreate}
+                  disabled={studentLoading}
+                >
+                  {studentLoading ? '발급 중...' : '학생 ID 발급받기'}
+                </button>
+                {entryMessage && <p className="success-text">{entryMessage}</p>}
+              </>
+            )}
             {studentError && <p className="error-text">{studentError}</p>}
-            <button type="button" onClick={handleEnter} disabled={studentLoading}>
-              {studentLoading ? '확인 중...' : '내 학습 시작하기'}
-            </button>
+            {entryMode === 'login' && (
+              <button
+                type="button"
+                onClick={handleEnter}
+                disabled={studentLoading}
+              >
+                {studentLoading ? '확인 중...' : '내 학습 시작하기'}
+              </button>
+            )}
             <button
               type="button"
               className="ghost-btn"
