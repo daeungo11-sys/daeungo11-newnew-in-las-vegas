@@ -12,6 +12,10 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import './ToeicPlatform.css';
 
@@ -49,6 +53,10 @@ function ToeicPlatform() {
   const [dailyReviewOutput, setDailyReviewOutput] = useState('');
   const [dailyReviewLoading, setDailyReviewLoading] = useState(false);
   const [dailyReviewError, setDailyReviewError] = useState('');
+  const [showMiniQuiz, setShowMiniQuiz] = useState(false);
+  const [miniQuizAnswers, setMiniQuizAnswers] = useState(['', '', '']);
+  const [miniQuizChecked, setMiniQuizChecked] = useState(false);
+  const [miniQuizScore, setMiniQuizScore] = useState({ correct: 0, incorrect: 0 });
 
   const [historyItems, setHistoryItems] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -63,6 +71,29 @@ function ToeicPlatform() {
 
   const [activeTooltip, setActiveTooltip] = useState('');
   const [activeSection, setActiveSection] = useState('history');
+  const [passageType, setPassageType] = useState('Email');
+  const [passageSummary, setPassageSummary] = useState(
+    '상황 요약: 회의 일정 변경 안내'
+  );
+  const [dailyQuestion, setDailyQuestion] = useState(
+    '문제: 회의 일정 변경을 정중하게 안내하는 이메일을 작성하세요.'
+  );
+
+  const passageOptions = {
+    Email: {
+      summary: '상황 요약: 회의 일정 변경 안내',
+      question:
+        '문제: 회의 일정 변경을 정중하게 안내하는 이메일을 작성하세요.',
+    },
+    'News Article': {
+      summary: '상황 요약: 회사의 신규 지점 오픈 소식',
+      question: '문제: 신규 지점 오픈에 대한 간단한 기사 요약을 작성하세요.',
+    },
+    Announcement: {
+      summary: '상황 요약: 사내 시스템 점검 공지',
+      question: '문제: 시스템 점검 일정과 유의사항을 공지문으로 작성하세요.',
+    },
+  };
 
   const weaknessText = useMemo(() => {
     if (selectedWeaknesses.length === 0) {
@@ -93,6 +124,34 @@ function ToeicPlatform() {
         `문제 ${index + 1}: ${item.inputText?.slice(0, 80) || '입력 없음'}`
     );
   }, [todayHistory]);
+
+  const miniQuiz = useMemo(() => {
+    const fallback = [
+      {
+        question: '빈칸에 들어갈 전치사를 고르세요: We will meet ___ Friday.',
+        answer: 'on',
+      },
+      {
+        question: '다음 문장을 정중하게 고치세요: The meeting is late.',
+        answer: 'The meeting has been postponed.',
+      },
+      {
+        question: '알맞은 동사를 고르세요: We would like to ___ you that...',
+        answer: 'inform',
+      },
+    ];
+    if (selectedWeaknesses.length === 0) return fallback;
+    const picks = selectedWeaknesses.slice(0, 3).map((item, index) => {
+      if (item.includes('전치사') || item.includes('독해')) {
+        return fallback[0];
+      }
+      if (item.includes('동의어') || item.includes('어휘')) {
+        return fallback[2];
+      }
+      return fallback[index % fallback.length];
+    });
+    return picks.length ? picks : fallback;
+  }, [selectedWeaknesses]);
 
   const getFriendlyError = (error, fallbackMessage) => {
     const message = error?.message || '';
@@ -148,6 +207,11 @@ function ToeicPlatform() {
     setStudentError('');
     setHistoryItems([]);
     setHistoryError('');
+    setMiniQuizAnswers(['', '', '']);
+    setMiniQuizChecked(false);
+    setMiniQuizScore({ correct: 0, incorrect: 0 });
+    setDailyReviewOutput('');
+    setDailyReviewError('');
   };
 
   const sectionNav = [
@@ -166,6 +230,14 @@ function ToeicPlatform() {
     }
   };
 
+  const handlePassageSelect = (type) => {
+    const option = passageOptions[type];
+    if (!option) return;
+    setPassageType(type);
+    setPassageSummary(option.summary);
+    setDailyQuestion(option.question);
+  };
+
   const handleParaphraseSubmit = async (e) => {
     e.preventDefault();
     if (!paraphraseInput.trim() || paraphraseLoading) return;
@@ -178,6 +250,8 @@ function ToeicPlatform() {
     const prompt = `You are a TOEIC paraphrasing coach.
 Given the student's sentence, rewrite it using common TOEIC-style expressions.
 Return 3 paraphrase alternatives in English, each as a bullet point, and add a short Korean note about the key expression used.
+Then add a Korean "오답 피드백" that explains what was weak in the student's sentence for today's lesson.
+Today's lesson type: ${passageType}
 Sentence: "${paraphraseInput.trim()}"`;
 
     try {
@@ -269,6 +343,22 @@ Keep it concise and actionable.`;
     } finally {
       setPracticeLoading(false);
     }
+  };
+
+  const handleMiniQuizCheck = () => {
+    let correct = 0;
+    let incorrect = 0;
+    miniQuiz.forEach((item, index) => {
+      const user = miniQuizAnswers[index]?.trim().toLowerCase();
+      const expected = item.answer.toLowerCase();
+      if (user && user.includes(expected)) {
+        correct += 1;
+      } else {
+        incorrect += 1;
+      }
+    });
+    setMiniQuizChecked(true);
+    setMiniQuizScore({ correct, incorrect });
   };
 
   const handleDailyReview = async () => {
@@ -408,6 +498,15 @@ ${historySummary}`;
   ];
 
   const errorColors = ['#4f46e5', '#7c83f1', '#7dd3a6', '#c7d2fe'];
+
+  const quizChartData = [
+    { name: '정답', value: miniQuizScore.correct },
+    { name: '오답', value: miniQuizScore.incorrect },
+  ];
+  const totalQuiz = miniQuizScore.correct + miniQuizScore.incorrect;
+  const wrongRate = totalQuiz
+    ? Math.round((miniQuizScore.incorrect / totalQuiz) * 100)
+    : 0;
 
   const requiredPhrases = [
     'Due to unforeseen circumstances',
@@ -656,6 +755,24 @@ ${historySummary}`;
                   </ul>
                 </div>
               )}
+              <div className="history-chart card">
+                <div className="chart-header">
+                  <h3>정답/오답률 요약</h3>
+                  <span className="chart-helper">
+                    오답률 {wrongRate}% · 0부터 시작
+                  </span>
+                </div>
+                <div className="chart-area">
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={quizChartData}>
+                      <XAxis dataKey="name" />
+                      <YAxis allowDecimals={false} />
+                      <RechartsTooltip />
+                      <Bar dataKey="value" fill="#4f46e5" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           </section>
         </>
@@ -789,11 +906,25 @@ ${historySummary}`;
         </div>
         <div className="study-grid">
           <div className="study-left">
+            <div className="passage-toggle">
+              {Object.keys(passageOptions).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={passageType === type ? 'active' : ''}
+                  onClick={() => handlePassageSelect(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
             <div className="badge-row">
-              <span className="badge">Email</span>
-              <span className="badge">News Article</span>
-              <span className="badge">Announcement</span>
-              <span className="badge soft">상황 요약: 회의 일정 변경 안내</span>
+              <span className="badge">{passageType}</span>
+              <span className="badge soft">{passageSummary}</span>
+            </div>
+            <div className="card question-card">
+              <h3>오늘의 문제</h3>
+              <p>{dailyQuestion}</p>
             </div>
             <div className="card phrase-card">
               <div className="phrase-header">
@@ -972,7 +1103,66 @@ ${historySummary}`;
               <pre>{practiceOutput}</pre>
             </div>
           )}
+          <button
+            type="button"
+            className="ghost-btn"
+            onClick={() => {
+              setMiniQuizAnswers(['', '', '']);
+              setMiniQuizChecked(false);
+              setShowMiniQuiz(true);
+            }}
+            disabled={!practiceOutput}
+          >
+            약점 보완 미니 문제 풀기
+          </button>
         </div>
+        {showMiniQuiz && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <div className="modal-header">
+                <h3>약점 보완 미니 문제</h3>
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => setShowMiniQuiz(false)}
+                >
+                  닫기
+                </button>
+              </div>
+              <div className="modal-body">
+                {miniQuiz.map((item, index) => (
+                  <div key={item.question} className="quiz-item">
+                    <p className="quiz-question">{item.question}</p>
+                    <input
+                      type="text"
+                      value={miniQuizAnswers[index] || ''}
+                      onChange={(event) => {
+                        const next = [...miniQuizAnswers];
+                        next[index] = event.target.value;
+                        setMiniQuizAnswers(next);
+                      }}
+                      placeholder="정답을 입력하세요"
+                    />
+                    {miniQuizChecked && (
+                      <p className="quiz-feedback">
+                        정답: {item.answer}
+                      </p>
+                    )}
+                  </div>
+                ))}
+                <button type="button" onClick={handleMiniQuizCheck}>
+                  채점하기
+                </button>
+                {miniQuizChecked && (
+                  <p className="quiz-score">
+                    정답 {miniQuizScore.correct}개 / 오답{' '}
+                    {miniQuizScore.incorrect}개
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
         </>
       )}
