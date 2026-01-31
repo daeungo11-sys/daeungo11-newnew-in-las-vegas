@@ -100,6 +100,7 @@ supabase link --project-ref <project-ref>
 supabase secrets set SUPABASE_URL=https://<project-ref>.supabase.co
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 supabase functions deploy create-student
+supabase functions deploy get-student
 supabase functions deploy save-history
 supabase functions deploy get-history
 ```

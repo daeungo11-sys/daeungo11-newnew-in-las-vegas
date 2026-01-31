@@ -41,3 +41,7 @@ export function saveStudentHistory(studentId, payload) {
 export function fetchStudentHistory(studentId, limit = 10) {
   return request(`/get-history?studentId=${studentId}&limit=${limit}`);
 }
+
+export function fetchStudent(studentId) {
+  return request(`/get-student?studentId=${studentId}`);
+}

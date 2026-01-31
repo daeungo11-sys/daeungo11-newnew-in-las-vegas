@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { generateText } from '../services/groqApi';
 import {
   createStudent,
+  fetchStudent,
   fetchStudentHistory,
   saveStudentHistory,
 } from '../services/apiClient';
@@ -45,6 +46,9 @@ function ToeicPlatform() {
   const [practiceOutput, setPracticeOutput] = useState('');
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState('');
+  const [dailyReviewOutput, setDailyReviewOutput] = useState('');
+  const [dailyReviewLoading, setDailyReviewLoading] = useState(false);
+  const [dailyReviewError, setDailyReviewError] = useState('');
 
   const [historyItems, setHistoryItems] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -67,6 +71,29 @@ function ToeicPlatform() {
     return selectedWeaknesses.join(', ');
   }, [selectedWeaknesses]);
 
+  const todayKey = new Date().toLocaleDateString('ko-KR');
+  const todayHistory = useMemo(
+    () =>
+      historyItems.filter(
+        (item) =>
+          new Date(item.createdAt).toLocaleDateString('ko-KR') === todayKey
+      ),
+    [historyItems, todayKey]
+  );
+  const todayWrongQuestions = useMemo(() => {
+    if (todayHistory.length === 0) {
+      return [
+        '문제 1: 회의 일정 변경 안내 문장 작성',
+        '문제 2: inform/notify 차이 활용 문장',
+        '문제 3: 전치사 in/on/at 선택',
+      ];
+    }
+    return todayHistory.map(
+      (item, index) =>
+        `문제 ${index + 1}: ${item.inputText?.slice(0, 80) || '입력 없음'}`
+    );
+  }, [todayHistory]);
+
   const getFriendlyError = (error, fallbackMessage) => {
     const message = error?.message || '';
     if (message.includes('Missing VITE_GROQ_API_KEY')) {
@@ -85,6 +112,7 @@ function ToeicPlatform() {
   };
 
   const handleEnter = () => {
+    if (studentLoading) return;
     const name = entryName.trim();
     const id = entryId.trim();
 
@@ -93,9 +121,33 @@ function ToeicPlatform() {
       return;
     }
 
+    setStudentLoading(true);
     setStudentError('');
-    setStudentName(name);
-    setStudentId(id);
+    fetchStudent(id)
+      .then((student) => {
+        if (!student?.id) {
+          throw new Error('학생 ID를 확인할 수 없어요.');
+        }
+        setStudentName(name);
+        setStudentId(student.id);
+      })
+      .catch((error) => {
+        console.error('Student Fetch Error:', error);
+        setStudentError('학생 ID를 확인할 수 없어요. 다시 확인해주세요.');
+      })
+      .finally(() => {
+        setStudentLoading(false);
+      });
+  };
+
+  const handleGoHome = () => {
+    setStudentName('');
+    setStudentId('');
+    setEntryName('');
+    setEntryId('');
+    setStudentError('');
+    setHistoryItems([]);
+    setHistoryError('');
   };
 
   const sectionNav = [
@@ -216,6 +268,66 @@ Keep it concise and actionable.`;
       setPracticeError('복습 플랜을 만들 수 없어요. 잠시 후 다시 시도해주세요.');
     } finally {
       setPracticeLoading(false);
+    }
+  };
+
+  const handleDailyReview = async () => {
+    if (dailyReviewLoading) return;
+
+    setDailyReviewLoading(true);
+    setDailyReviewError('');
+    setDailyReviewOutput('');
+
+    const historySummary =
+      todayHistory.length > 0
+        ? todayHistory
+            .map((item) => `- ${item.activityType}: ${item.inputText}`)
+            .join('\n')
+        : '오늘 기록된 학습 히스토리가 없습니다.';
+
+    const prompt = `You are a TOEIC coach.
+Summarize today's mistakes and create a short review plan in Korean.
+1) 오늘 약점 요약 2) 다시 연습할 핵심 표현 3) 복습 미니 문제 3개
+오늘 틀린 문제 목록:
+${todayWrongQuestions.map((item) => `- ${item}`).join('\n')}
+
+오늘 학습 기록:
+${historySummary}`;
+
+    try {
+      const text = await generateText(prompt, {
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.5,
+        max_tokens: 700,
+      });
+      setDailyReviewOutput(text.trim());
+
+      if (studentId) {
+        try {
+          await saveStudentHistory(studentId, {
+            activityType: 'DAILY_REVIEW',
+            inputText: todayWrongQuestions.join('\n'),
+            outputText: text.trim(),
+          });
+        } catch (saveError) {
+          console.error('History Save Error:', saveError);
+          setDailyReviewError(
+            getFriendlyError(
+              saveError,
+              '히스토리 저장에 실패했어요. 학생 ID를 확인해주세요.'
+            )
+          );
+        }
+      } else {
+        setDailyReviewError('학생 ID를 설정하면 결과가 히스토리에 저장돼요.');
+      }
+    } catch (error) {
+      console.error('Daily Review Error:', error);
+      setDailyReviewError(
+        getFriendlyError(error, '오늘 학습 약점 분석에 실패했어요.')
+      );
+    } finally {
+      setDailyReviewLoading(false);
     }
   };
 
@@ -381,8 +493,8 @@ Keep it concise and actionable.`;
               placeholder="예: 42AB"
             />
             {studentError && <p className="error-text">{studentError}</p>}
-            <button type="button" onClick={handleEnter}>
-              내 학습 시작하기
+            <button type="button" onClick={handleEnter} disabled={studentLoading}>
+              {studentLoading ? '확인 중...' : '내 학습 시작하기'}
             </button>
           </div>
         </section>
@@ -392,6 +504,11 @@ Keep it concise and actionable.`;
 
   return (
     <div className="toeic-platform">
+      <div className="home-button-wrapper">
+        <button type="button" className="home-button" onClick={handleGoHome}>
+          홈
+        </button>
+      </div>
       <header className="platform-hero">
         <div className="hero-content">
           <h1>TOEIC Paraphrasing & Review Platform</h1>
@@ -800,6 +917,31 @@ Keep it concise and actionable.`;
           </p>
         </div>
         <div className="card">
+          <div className="review-card">
+            <div className="review-header">
+              <h3>오늘 틀린 문제</h3>
+              <span className="review-helper">{todayKey} 기준</span>
+            </div>
+            <ul className="wrong-list">
+              {todayWrongQuestions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={handleDailyReview}
+              disabled={dailyReviewLoading}
+            >
+              {dailyReviewLoading ? '분석 중...' : '오늘 학습 약점 분석'}
+            </button>
+            {dailyReviewError && <p className="error-text">{dailyReviewError}</p>}
+            {dailyReviewOutput && (
+              <div className="result-box">
+                <h3>오늘 학습 약점 & 복습</h3>
+                <pre>{dailyReviewOutput}</pre>
+              </div>
+            )}
+          </div>
           <div className="weakness-grid">
             {WEAKNESS_OPTIONS.map((option) => (
               <label key={option} className="weakness-chip">
