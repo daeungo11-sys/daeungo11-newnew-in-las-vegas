@@ -54,7 +54,7 @@ Supabase SQL Editor에서 아래를 실행하세요:
 
 ```
 create table if not exists students (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   name text not null,
   email text unique,
   created_at timestamptz default now()
@@ -62,7 +62,7 @@ create table if not exists students (
 
 create table if not exists student_activities (
   id uuid primary key default gen_random_uuid(),
-  student_id uuid not null references students(id) on delete cascade,
+  student_id text not null references students(id) on delete cascade,
   activity_type text not null,
   input_text text not null,
   output_text text not null,
@@ -71,6 +71,23 @@ create table if not exists student_activities (
 
 create index if not exists student_activities_student_id_idx
   on student_activities(student_id, created_at desc);
+```
+
+이미 테이블이 생성되어 있다면 아래를 추가 실행하세요:
+
+```
+alter table student_activities
+  drop constraint if exists student_activities_student_id_fkey;
+
+alter table students
+  alter column id type text;
+
+alter table student_activities
+  alter column student_id type text;
+
+alter table student_activities
+  add constraint student_activities_student_id_fkey
+  foreign key (student_id) references students(id) on delete cascade;
 ```
 
 ### 3) Supabase Edge Functions 배포

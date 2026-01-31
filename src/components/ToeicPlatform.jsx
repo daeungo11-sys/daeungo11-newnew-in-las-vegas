@@ -266,17 +266,17 @@ Keep it concise and actionable.`;
   ];
 
   const summaryCards = [
-    { label: '제출률', value: '86%', helper: '지난 7일 기준' },
-    { label: '평균 점수', value: '78점', helper: '문법+어휘+적합도 평균' },
-    { label: '최다 오류', value: '시제/수일치', helper: '오류 32건' },
-    { label: '활동 학생', value: '24명', helper: '오늘 참여' },
+    { label: '제출률', value: '0%', helper: '지난 7일 기준' },
+    { label: '평균 점수', value: '0점', helper: '문법+어휘+적합도 평균' },
+    { label: '최다 오류', value: '없음', helper: '오류 0건' },
+    { label: '활동 학생', value: '0명', helper: '오늘 참여' },
   ];
 
   const errorDistribution = [
-    { name: '시제/수일치', value: 32 },
-    { name: '전치사', value: 18 },
-    { name: '동의어', value: 14 },
-    { name: '관계사', value: 9 },
+    { name: '시제/수일치', value: 0 },
+    { name: '전치사', value: 0 },
+    { name: '동의어', value: 0 },
+    { name: '관계사', value: 0 },
   ];
 
   const errorColors = ['#4f46e5', '#7c83f1', '#7dd3a6', '#c7d2fe'];
