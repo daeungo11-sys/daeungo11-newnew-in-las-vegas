@@ -691,6 +691,36 @@
   color: var(--color-indigo);
 }
 
+.result-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f8faff;
+  border: 1px solid #dbe2ff;
+  font-size: 13px;
+}
+
+.result-list strong {
+  color: var(--color-indigo);
+}
+
+.hint-text {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
 .history-chart {
   margin-top: 16px;
 }

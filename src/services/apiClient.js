@@ -45,3 +45,7 @@ export function fetchStudentHistory(studentId, limit = 10) {
 export function fetchStudent(studentId) {
   return request(`/get-student?studentId=${studentId}`);
 }
+
+export function findStudentsByName(name) {
+  return request(`/find-student?name=${encodeURIComponent(name)}`);
+}

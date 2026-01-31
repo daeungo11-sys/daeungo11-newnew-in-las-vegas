@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { generateText } from '../services/groqApi';
 import {
   createStudent,
+  findStudentsByName,
   fetchStudent,
   fetchStudentHistory,
   saveStudentHistory,
@@ -38,6 +39,11 @@ function ToeicPlatform() {
   const [activeView, setActiveView] = useState('student');
   const [entryName, setEntryName] = useState('');
   const [entryId, setEntryId] = useState('');
+  const [findName, setFindName] = useState('');
+  const [findResults, setFindResults] = useState([]);
+  const [findLoading, setFindLoading] = useState(false);
+  const [findError, setFindError] = useState('');
+  const [showFindModal, setShowFindModal] = useState(false);
 
   const [paraphraseInput, setParaphraseInput] = useState('');
   const [paraphraseOutput, setParaphraseOutput] = useState('');
@@ -212,6 +218,10 @@ function ToeicPlatform() {
     setMiniQuizScore({ correct: 0, incorrect: 0 });
     setDailyReviewOutput('');
     setDailyReviewError('');
+    setFindResults([]);
+    setFindError('');
+    setFindName('');
+    setShowFindModal(false);
   };
 
   const sectionNav = [
@@ -236,6 +246,30 @@ function ToeicPlatform() {
     setPassageType(type);
     setPassageSummary(option.summary);
     setDailyQuestion(option.question);
+  };
+
+  const handleFindStudent = async () => {
+    if (findLoading) return;
+    const name = findName.trim();
+    if (!name) {
+      setFindError('이름을 입력해주세요.');
+      return;
+    }
+    setFindLoading(true);
+    setFindError('');
+    setFindResults([]);
+    try {
+      const result = await findStudentsByName(name);
+      setFindResults(Array.isArray(result) ? result : []);
+      if (!result || result.length === 0) {
+        setFindError('해당 이름의 학생 ID를 찾지 못했어요.');
+      }
+    } catch (error) {
+      console.error('Find Student Error:', error);
+      setFindError('학생 ID 조회에 실패했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setFindLoading(false);
+    }
   };
 
   const handleParaphraseSubmit = async (e) => {
@@ -595,8 +629,61 @@ ${historySummary}`;
             <button type="button" onClick={handleEnter} disabled={studentLoading}>
               {studentLoading ? '확인 중...' : '내 학습 시작하기'}
             </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => setShowFindModal(true)}
+            >
+              학생 ID 찾기
+            </button>
           </div>
         </section>
+        {showFindModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <div className="modal-header">
+                <h3>학생 ID 찾기</h3>
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => setShowFindModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+              <div className="modal-body">
+                <label htmlFor="find-name">이름</label>
+                <input
+                  id="find-name"
+                  type="text"
+                  value={findName}
+                  onChange={(event) => setFindName(event.target.value)}
+                  placeholder="이름을 입력하세요"
+                />
+                <button type="button" onClick={handleFindStudent}>
+                  {findLoading ? '조회 중...' : '학생 ID 조회'}
+                </button>
+                {findError && <p className="error-text">{findError}</p>}
+                {findResults.length > 0 && (
+                  <div className="result-box">
+                    <h3>조회 결과</h3>
+                    <ul className="result-list">
+                      {findResults.map((item) => (
+                        <li key={item.id}>
+                          <span>{item.name}</span>
+                          <strong>{item.id}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="hint-text">
+                      찾은 ID를 복사해서 입력 후 시작하세요.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
