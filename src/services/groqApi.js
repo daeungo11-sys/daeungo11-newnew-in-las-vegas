@@ -1,10 +1,19 @@
 import Groq from 'groq-sdk';
 
+const groqApiKey =
+  import.meta.env.VITE_GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
+
 // Groq 클라이언트 초기화
 const groq = new Groq({
-  apiKey: import.meta.env.VITE_GROQ_API_KEY || process.env.VITE_GROQ_API_KEY,
+  apiKey: groqApiKey,
   dangerouslyAllowBrowser: true,
 });
+
+function ensureGroqKey() {
+  if (!groqApiKey) {
+    throw new Error('Missing VITE_GROQ_API_KEY');
+  }
+}
 
 /**
  * Groq API를 사용하여 채팅 완성 요청
@@ -14,6 +23,7 @@ const groq = new Groq({
  */
 export async function chatCompletion(messages, options = {}) {
   try {
+    ensureGroqKey();
     const {
       model = 'llama-3.1-8b-instant',
       temperature = 0.7,
@@ -46,6 +56,7 @@ export async function chatCompletion(messages, options = {}) {
  */
 export async function streamChatCompletion(messages, onChunk, options = {}) {
   try {
+    ensureGroqKey();
     const {
       model = 'llama-3.1-8b-instant',
       temperature = 0.7,
@@ -81,6 +92,7 @@ export async function streamChatCompletion(messages, onChunk, options = {}) {
  */
 export async function generateText(prompt, options = {}) {
   try {
+    ensureGroqKey();
     const messages = [
       {
         role: 'user',

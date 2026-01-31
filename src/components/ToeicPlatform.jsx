@@ -36,6 +36,7 @@ function ToeicPlatform() {
   const [paraphraseOutput, setParaphraseOutput] = useState('');
   const [paraphraseLoading, setParaphraseLoading] = useState(false);
   const [paraphraseError, setParaphraseError] = useState('');
+  const [paraphraseNotice, setParaphraseNotice] = useState('');
 
   const [selectedWeaknesses, setSelectedWeaknesses] = useState([]);
   const [classNotes, setClassNotes] = useState('');
@@ -50,6 +51,7 @@ function ToeicPlatform() {
   const [editorText, setEditorText] = useState('');
   const [editorError, setEditorError] = useState('');
   const [editorSubmitting, setEditorSubmitting] = useState(false);
+  const [editorSuccess, setEditorSuccess] = useState('');
 
   const [compareInput, setCompareInput] = useState('');
 
@@ -62,6 +64,23 @@ function ToeicPlatform() {
     return selectedWeaknesses.join(', ');
   }, [selectedWeaknesses]);
 
+  const getFriendlyError = (error, fallbackMessage) => {
+    const message = error?.message || '';
+    if (message.includes('Missing VITE_GROQ_API_KEY')) {
+      return 'Groq API 키가 설정되지 않았어요. Vercel 환경변수 또는 .env를 확인해주세요.';
+    }
+    if (message.includes('Supabase Edge Functions environment variables are missing')) {
+      return 'Supabase 환경변수가 설정되지 않았어요. Vercel 환경변수를 확인해주세요.';
+    }
+    if (message.includes("Could not find the table 'public.students'")) {
+      return 'Supabase students 테이블이 없어요. SQL Editor에서 테이블을 생성해주세요.';
+    }
+    if (message.includes("Could not find the table 'public.student_activities'")) {
+      return 'Supabase student_activities 테이블이 없어요. SQL Editor에서 테이블을 생성해주세요.';
+    }
+    return fallbackMessage;
+  };
+
   const handleParaphraseSubmit = async (e) => {
     e.preventDefault();
     if (!paraphraseInput.trim() || paraphraseLoading) return;
@@ -69,6 +88,7 @@ function ToeicPlatform() {
     setParaphraseLoading(true);
     setParaphraseError('');
     setParaphraseOutput('');
+    setParaphraseNotice('');
 
     const prompt = `You are a TOEIC paraphrasing coach.
 Given the student's sentence, rewrite it using common TOEIC-style expressions.
@@ -92,14 +112,21 @@ Sentence: "${paraphraseInput.trim()}"`;
           });
         } catch (saveError) {
           console.error('History Save Error:', saveError);
-          setParaphraseError('히스토리 저장에 실패했어요. 학생 ID를 확인해주세요.');
+          setParaphraseError(
+            getFriendlyError(
+              saveError,
+              '히스토리 저장에 실패했어요. 학생 ID를 확인해주세요.'
+            )
+          );
         }
       } else {
-        setParaphraseError('학생 ID를 설정하면 결과가 히스토리에 저장돼요.');
+        setParaphraseNotice('학생 ID를 설정하면 결과가 히스토리에 저장돼요.');
       }
     } catch (error) {
       console.error('Paraphrase Error:', error);
-      setParaphraseError('문장을 분석하지 못했어요. API 키를 확인해주세요.');
+      setParaphraseError(
+        getFriendlyError(error, '문장을 분석하지 못했어요. API 키를 확인해주세요.')
+      );
     } finally {
       setParaphraseLoading(false);
     }
@@ -258,9 +285,11 @@ Keep it concise and actionable.`;
 
     setEditorSubmitting(true);
     setEditorError('');
+    setEditorSuccess('');
     try {
       if (!studentId) {
-        throw new Error('학생 ID가 없습니다.');
+        setEditorError('학생 ID가 없어요. 먼저 학생 ID를 생성하거나 입력해주세요.');
+        return;
       }
 
       await saveStudentHistory(studentId, {
@@ -268,9 +297,12 @@ Keep it concise and actionable.`;
         inputText: editorText.trim(),
         outputText: editorText.trim(),
       });
+      setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
       console.error('Writing Submit Error:', error);
-      setEditorError('제출에 실패했어요. 학생 ID를 확인해주세요.');
+      setEditorError(
+        getFriendlyError(error, '제출에 실패했어요. 학생 ID를 확인해주세요.')
+      );
     } finally {
       setEditorSubmitting(false);
     }
@@ -525,6 +557,7 @@ Keep it concise and actionable.`;
             {paraphraseLoading ? '분석 중...' : '토익 패러프레이징 제안 받기'}
           </button>
           {paraphraseError && <p className="error-text">{paraphraseError}</p>}
+          {paraphraseNotice && <p className="info-text">{paraphraseNotice}</p>}
           {paraphraseOutput && (
             <div className="result-box">
               <h3>추천 대체 문장</h3>
@@ -588,6 +621,7 @@ Keep it concise and actionable.`;
                   />
                 </div>
                 {editorError && <p className="error-text">{editorError}</p>}
+                {editorSuccess && <p className="success-text">{editorSuccess}</p>}
                 <button
                   type="button"
                   className="submit-btn"

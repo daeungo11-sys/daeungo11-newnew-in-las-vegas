@@ -547,6 +547,16 @@
   font-size: 13px;
 }
 
+.info-text {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.success-text {
+  color: #16a34a;
+  font-size: 13px;
+}
+
 .document-card {
   border: 1px solid #d1d5db;
   background: #fff;
