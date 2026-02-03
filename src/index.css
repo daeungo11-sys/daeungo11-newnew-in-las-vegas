@@ -12,6 +12,18 @@
   --color-green: #22c55e;
 }
 
+[data-theme='dark'] {
+  --color-bg: #0b1220;
+  --color-surface: #111827;
+  --color-border: #1f2937;
+  --color-text: #e5e7eb;
+  --color-muted: #9ca3af;
+  --color-indigo: #8b9bff;
+  --color-indigo-soft: #1f2a44;
+  --color-green-soft: #123824;
+  --color-green: #34d399;
+}
+
 * {
   box-sizing: border-box;
 }

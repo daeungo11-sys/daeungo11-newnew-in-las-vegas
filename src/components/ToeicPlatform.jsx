@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { generateText } from '../services/groqApi';
 import {
   createStudent,
@@ -37,6 +37,7 @@ function ToeicPlatform() {
   const [studentError, setStudentError] = useState('');
   const [studentLoading, setStudentLoading] = useState(false);
   const [activeView, setActiveView] = useState('student');
+  const [theme, setTheme] = useState('light');
   const [entryName, setEntryName] = useState('');
   const [entryId, setEntryId] = useState('');
   const [entryMode, setEntryMode] = useState('login');
@@ -143,6 +144,14 @@ function ToeicPlatform() {
     }
     return selectedWeaknesses.join(', ');
   }, [selectedWeaknesses]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const todayKey = new Date().toLocaleDateString('ko-KR');
   const todayHistory = useMemo(
@@ -707,6 +716,11 @@ ${editorText.trim()}`;
   if (!hasAccess) {
     return (
       <div className="toeic-platform">
+        <div className="top-actions">
+          <button type="button" className="theme-toggle" onClick={toggleTheme}>
+            {theme === 'dark' ? '라이트 모드' : '다크 모드'}
+          </button>
+        </div>
         <header className="platform-hero entry-hero">
           <div className="hero-content">
             <h1>TOEIC Paraphrasing & Review Platform</h1>
@@ -861,6 +875,11 @@ ${editorText.trim()}`;
 
   return (
     <div className="toeic-platform">
+      <div className="top-actions">
+        <button type="button" className="theme-toggle" onClick={toggleTheme}>
+          {theme === 'dark' ? '라이트 모드' : '다크 모드'}
+        </button>
+      </div>
       <div className="home-button-wrapper">
         <button type="button" className="home-button" onClick={handleGoHome}>
           홈

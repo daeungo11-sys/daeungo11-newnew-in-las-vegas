@@ -5,6 +5,32 @@
   padding: 48px 24px 80px;
 }
 
+.top-actions {
+  max-width: 960px;
+  margin: 0 auto 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.theme-toggle {
+  background: #ffffff;
+  border: 1px solid #dbe2ff;
+  color: var(--color-indigo);
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-indigo);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+}
+
 .platform-hero {
   max-width: 960px;
   margin: 0 auto 40px;
@@ -85,6 +111,59 @@
   font-weight: 700;
   border: 1px solid #d9ddff;
   box-shadow: 0 6px 14px rgba(79, 70, 229, 0.12);
+}
+
+[data-theme='dark'] .toeic-platform {
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 45%, #0b1220 100%);
+}
+
+[data-theme='dark'] .platform-hero {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #0f172a 100%);
+  border-color: #1f2937;
+}
+
+[data-theme='dark'] .hero-badges span {
+  background: #0f172a;
+  color: #c7d2fe;
+  border-color: #1f2a44;
+}
+
+[data-theme='dark'] .theme-toggle,
+[data-theme='dark'] .home-button {
+  background: #0f172a;
+  border-color: #1f2a44;
+  color: #c7d2fe;
+}
+
+[data-theme='dark'] .section-nav button,
+[data-theme='dark'] .view-toggle button,
+[data-theme='dark'] .entry-toggle button {
+  background: #0f172a;
+  border-color: #1f2a44;
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .section-nav button.active {
+  background: #1f2a44;
+  color: #c7d2fe;
+}
+
+[data-theme='dark'] .card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .card textarea,
+[data-theme='dark'] .card input[type='text'] {
+  background: #0f172a;
+  border-color: #1f2a44;
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .result-box,
+[data-theme='dark'] .modal-card {
+  background: #111827;
+  border-color: #1f2937;
 }
 
 .entry-card {
@@ -962,6 +1041,10 @@
 }
 
 @media (max-width: 720px) {
+  .top-actions {
+    justify-content: center;
+  }
+
   .platform-hero,
   .card {
     padding: 22px;
