@@ -1440,6 +1440,7 @@ ${editorText.trim()}`;
           </div>
         )}
       </section>
+      )}
         </>
       )}
     </div>
