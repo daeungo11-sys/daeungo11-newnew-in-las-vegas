@@ -92,19 +92,49 @@ function ToeicPlatform() {
   );
 
   const passageOptions = {
-    Email: {
-      summary: '상황 요약: 회의 일정 변경 안내',
-      question:
-        '문제: 회의 일정 변경을 정중하게 안내하는 이메일을 작성하세요.',
-    },
-    'News Article': {
-      summary: '상황 요약: 회사의 신규 지점 오픈 소식',
-      question: '문제: 신규 지점 오픈에 대한 간단한 기사 요약을 작성하세요.',
-    },
-    Announcement: {
-      summary: '상황 요약: 사내 시스템 점검 공지',
-      question: '문제: 시스템 점검 일정과 유의사항을 공지문으로 작성하세요.',
-    },
+    Email: [
+      {
+        summary: '상황 요약: 회의 일정 변경 안내',
+        question:
+          '문제: 회의 일정 변경을 정중하게 안내하는 이메일을 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 출장 일정 변경 및 대체 일정 제안',
+        question: '문제: 출장 일정 변경에 대한 대체 일정을 제안하세요.',
+      },
+      {
+        summary: '상황 요약: 계약서 검토 완료 및 회신 요청',
+        question: '문제: 계약서 검토 완료 사실과 회신 요청을 작성하세요.',
+      },
+    ],
+    'News Article': [
+      {
+        summary: '상황 요약: 회사의 신규 지점 오픈 소식',
+        question: '문제: 신규 지점 오픈에 대한 간단한 기사 요약을 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 분기 실적 발표 및 성장률 강조',
+        question: '문제: 분기 실적 발표 기사 요약을 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 친환경 캠페인 참여 소식',
+        question: '문제: 친환경 캠페인 참여 내용을 기사로 요약하세요.',
+      },
+    ],
+    Announcement: [
+      {
+        summary: '상황 요약: 사내 시스템 점검 공지',
+        question: '문제: 시스템 점검 일정과 유의사항을 공지문으로 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 사내 교육 일정 안내',
+        question: '문제: 교육 일정과 준비 사항을 공지문으로 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 사무실 이전 일정 공지',
+        question: '문제: 사무실 이전 일정과 안내사항을 공지문으로 작성하세요.',
+      },
+    ],
   };
 
   const weaknessText = useMemo(() => {
@@ -293,11 +323,12 @@ function ToeicPlatform() {
   };
 
   const handlePassageSelect = (type) => {
-    const option = passageOptions[type];
-    if (!option) return;
+    const options = passageOptions[type];
+    if (!options || options.length === 0) return;
+    const pick = options[Math.floor(Math.random() * options.length)];
     setPassageType(type);
-    setPassageSummary(option.summary);
-    setDailyQuestion(option.question);
+    setPassageSummary(pick.summary);
+    setDailyQuestion(pick.question);
   };
 
   const handleFindStudent = async () => {
@@ -848,6 +879,19 @@ ${editorText.trim()}`;
         </div>
       </header>
 
+      <div className="section-nav">
+        {sectionNav.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={activeSection === item.id ? 'active' : ''}
+            onClick={() => handleSectionNav(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
       <div className="view-toggle">
         <button
           type="button"
@@ -1008,19 +1052,6 @@ ${editorText.trim()}`;
 
       {activeView === 'student' && (
         <>
-          <div className="section-nav">
-            {sectionNav.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={activeSection === item.id ? 'active' : ''}
-                onClick={() => handleSectionNav(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
           <section className="platform-section">
             <div className="section-header">
               <h2>내 학습 히스토리</h2>
