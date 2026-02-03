@@ -15,6 +15,24 @@
   border: 1px solid #dde4ff;
 }
 
+.entry-hero {
+  text-align: center;
+  padding: 28px 32px;
+}
+
+.entry-hero .hero-content h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.entry-hero .hero-content p {
+  margin-bottom: 16px;
+}
+
+.entry-hero .hero-badges {
+  justify-content: center;
+}
+
 .home-button-wrapper {
   display: flex;
   justify-content: center;
@@ -889,6 +907,11 @@
   font-size: 13px;
 }
 
+.empty-text {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
 .info-text {
   color: #0f172a;
   font-size: 13px;
@@ -974,6 +997,36 @@
   .entry-card {
     max-width: 100%;
   }
+
+  .entry-hero .hero-content h1 {
+    font-size: 22px;
+  }
+
+  .entry-hero .hero-badges {
+    gap: 8px;
+  }
+
+  .section-nav {
+    gap: 6px;
+  }
+
+  .section-nav button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .view-toggle {
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+  }
+
+  .modal-card {
+    padding: 16px;
+  }
+
+  .result-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (min-width: 721px) and (max-width: 1024px) {
@@ -992,5 +1045,17 @@
 
   .chart-row {
     grid-template-columns: 1fr;
+  }
+
+  .entry-hero .hero-content h1 {
+    font-size: 26px;
+  }
+
+  .section-nav {
+    gap: 8px;
+  }
+
+  .section-nav button {
+    padding: 9px 14px;
   }
 }

@@ -71,11 +71,13 @@ function ToeicPlatform() {
   const [historyItems, setHistoryItems] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   const [editorText, setEditorText] = useState('');
   const [editorError, setEditorError] = useState('');
   const [editorSubmitting, setEditorSubmitting] = useState(false);
   const [editorSuccess, setEditorSuccess] = useState('');
+  const [editorFeedback, setEditorFeedback] = useState('');
 
   const [compareInput, setCompareInput] = useState('');
 
@@ -180,6 +182,22 @@ function ToeicPlatform() {
     return fallbackMessage;
   };
 
+  const loadHistoryForId = async (id) => {
+    if (!id || historyLoading) return;
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const items = await fetchStudentHistory(id, 10);
+      setHistoryItems(items);
+      setHistoryLoaded(true);
+    } catch (error) {
+      console.error('History Load Error:', error);
+      setHistoryError('히스토리를 불러오지 못했어요. 학생 ID를 확인해주세요.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const handleEnter = () => {
     if (studentLoading) return;
     const name = entryName.trim();
@@ -199,6 +217,7 @@ function ToeicPlatform() {
         }
         setStudentName(name);
         setStudentId(student.id);
+        loadHistoryForId(student.id);
       })
       .catch((error) => {
         console.error('Student Fetch Error:', error);
@@ -242,6 +261,7 @@ function ToeicPlatform() {
     setStudentError('');
     setHistoryItems([]);
     setHistoryError('');
+    setHistoryLoaded(false);
     setMiniQuizAnswers(['', '', '']);
     setMiniQuizChecked(false);
     setMiniQuizScore({ correct: 0, incorrect: 0 });
@@ -530,19 +550,9 @@ ${historySummary}`;
   };
 
   const handleLoadHistory = async () => {
-    if (!studentId.trim() || historyLoading) return;
-
-    setHistoryLoading(true);
-    setHistoryError('');
-    try {
-      const items = await fetchStudentHistory(studentId.trim(), 10);
-      setHistoryItems(items);
-    } catch (error) {
-      console.error('History Load Error:', error);
-      setHistoryError('히스토리를 불러오지 못했어요. 학생 ID를 확인해주세요.');
-    } finally {
-      setHistoryLoading(false);
-    }
+    if (!studentId.trim()) return;
+    await loadHistoryForId(studentId.trim());
+    setActiveSection('history');
   };
 
   const formatDate = (value) => {
@@ -622,16 +632,31 @@ ${historySummary}`;
     setEditorSubmitting(true);
     setEditorError('');
     setEditorSuccess('');
+    setEditorFeedback('');
     try {
       if (!studentId) {
         setEditorError('학생 ID가 없어요. 먼저 학생 ID를 생성하거나 입력해주세요.');
         return;
       }
 
+      const prompt = `You are a TOEIC writing coach.
+Give concise feedback in Korean on the student's business document writing.
+Include: 1) 잘한 점 2) 개선할 점 3) 더 TOEIC스럽게 바꾼 예시 1개.
+학생 문장:
+${editorText.trim()}`;
+
+      const feedback = await generateText(prompt, {
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.4,
+        max_tokens: 600,
+      });
+
+      setEditorFeedback(feedback.trim());
+
       await saveStudentHistory(studentId, {
         activityType: 'WRITING_SUBMISSION',
         inputText: editorText.trim(),
-        outputText: editorText.trim(),
+        outputText: feedback.trim(),
       });
       setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
@@ -649,7 +674,7 @@ ${historySummary}`;
   if (!hasAccess) {
     return (
       <div className="toeic-platform">
-        <header className="platform-hero">
+        <header className="platform-hero entry-hero">
           <div className="hero-content">
             <h1>TOEIC Paraphrasing & Review Platform</h1>
             <p>내 학습 히스토리를 불러오기 위해 이름과 학생 ID를 입력하세요.</p>
@@ -955,6 +980,9 @@ ${historySummary}`;
                   </ul>
                 </div>
               )}
+              {historyLoaded && historyItems.length === 0 && !historyError && (
+                <p className="empty-text">아직 저장된 학습 히스토리가 없어요.</p>
+              )}
               <div className="history-chart card">
                 <div className="chart-header">
                   <h3>정답/오답률 요약</h3>
@@ -1165,6 +1193,12 @@ ${historySummary}`;
                 </div>
                 {editorError && <p className="error-text">{editorError}</p>}
                 {editorSuccess && <p className="success-text">{editorSuccess}</p>}
+                {editorFeedback && (
+                  <div className="result-box">
+                    <h3>AI 피드백</h3>
+                    <pre>{editorFeedback}</pre>
+                  </div>
+                )}
                 <button
                   type="button"
                   className="submit-btn"
