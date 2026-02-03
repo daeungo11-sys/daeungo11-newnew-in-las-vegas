@@ -315,11 +315,13 @@ function ToeicPlatform() {
   ];
 
   const handleSectionNav = (id) => {
-    const target = document.getElementById(`section-${id}`);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveSection(id);
-    }
+    setActiveSection(id);
+    requestAnimationFrame(() => {
+      const target = document.getElementById(`section-${id}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   };
 
   const handlePassageSelect = (type) => {
