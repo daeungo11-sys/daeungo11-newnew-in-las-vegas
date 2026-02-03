@@ -879,18 +879,20 @@ ${editorText.trim()}`;
         </div>
       </header>
 
-      <div className="section-nav">
-        {sectionNav.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={activeSection === item.id ? 'active' : ''}
-            onClick={() => handleSectionNav(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {activeView === 'student' && (
+        <div className="section-nav">
+          {sectionNav.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={activeSection === item.id ? 'active' : ''}
+              onClick={() => handleSectionNav(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="view-toggle">
         <button
@@ -1052,7 +1054,8 @@ ${editorText.trim()}`;
 
       {activeView === 'student' && (
         <>
-          <section className="platform-section">
+          {activeSection === 'history' && (
+            <section className="platform-section">
             <div className="section-header">
               <h2>내 학습 히스토리</h2>
               <p>
@@ -1123,7 +1126,9 @@ ${editorText.trim()}`;
               )}
             </div>
           </section>
+          )}
 
+      {activeSection === 'paraphrase' && (
       <section id="section-paraphrase" className="platform-section">
         <div className="section-header">
           <h2>Step 1. 토익 패러프레이징 훈련</h2>
@@ -1154,7 +1159,9 @@ ${editorText.trim()}`;
           )}
         </form>
       </section>
+      )}
 
+      {activeSection === 'summary' && (
       <section id="section-summary" className="platform-section">
         <div className="section-header">
           <h2>Step 1-2. 학습 지문 요약 & 영작 에디터</h2>
@@ -1243,7 +1250,9 @@ ${editorText.trim()}`;
           </div>
         </div>
       </section>
+      )}
 
+      {activeSection === 'compare' && (
       <section id="section-compare" className="platform-section">
         <div className="section-header">
           <h2>코드 비교형 패러프레이징 뷰</h2>
@@ -1303,7 +1312,9 @@ ${editorText.trim()}`;
           </div>
         </div>
       </section>
+      )}
 
+      {activeSection === 'review' && (
       <section id="section-review" className="platform-section">
         <div className="section-header">
           <h2>Step 2. 수업 후 반복 학습 + 개인별 약점 보완</h2>
