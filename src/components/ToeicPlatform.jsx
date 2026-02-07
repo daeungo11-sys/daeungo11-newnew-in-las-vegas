@@ -343,8 +343,8 @@ function ToeicPlatform() {
     { id: 'history', label: '학습 히스토리' },
     { id: 'paraphrase', label: 'Paraphrasing Training' },
     { id: 'summary', label: '학습 지문 요약' },
-    { id: 'compare', label: 'Paraphrasing Diff View' },
-    { id: 'review', label: '수업 후 반복 학습+개인별 약점 보완' },
+    { id: 'compare', label: 'Paraphrasing View' },
+    { id: 'review', label: '보완학습' },
   ];
 
   const handleSectionNav = (id) => {

@@ -160,6 +160,17 @@
   color: var(--color-text);
 }
 
+[data-theme='dark'] .compare-card,
+[data-theme='dark'] .compare-panel {
+  background: #0f172a;
+  border-color: #1f2a44;
+}
+
+[data-theme='dark'] .compare-text,
+[data-theme='dark'] .compare-input {
+  color: var(--color-text);
+}
+
 [data-theme='dark'] .result-box,
 [data-theme='dark'] .modal-card {
   background: #111827;
