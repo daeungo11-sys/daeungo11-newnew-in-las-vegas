@@ -1073,10 +1073,8 @@ ${editorText.trim()}`;
         </>
       )}
 
-      {activeView === 'student' && (
-        <>
-          {activeSection === 'history' && (
-            <section className="platform-section">
+      {activeSection === 'history' && (
+        <section className="platform-section">
             <div className="section-header">
               <h2>내 학습 히스토리</h2>
               <p>
@@ -1147,7 +1145,7 @@ ${editorText.trim()}`;
               )}
             </div>
           </section>
-          )}
+      )}
 
       {activeSection === 'paraphrase' && (
       <section id="section-paraphrase" className="platform-section">
@@ -1461,8 +1459,6 @@ ${editorText.trim()}`;
           </div>
         )}
       </section>
-      )}
-        </>
       )}
     </div>
   );
