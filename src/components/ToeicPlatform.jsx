@@ -257,6 +257,17 @@ function ToeicPlatform() {
     }
   };
 
+  const refreshHistory = async (id = studentId) => {
+    if (!id) return;
+    try {
+      const items = await fetchStudentHistory(id, 10);
+      setHistoryItems(items);
+      setHistoryLoaded(true);
+    } catch (error) {
+      console.error('History Refresh Error:', error);
+    }
+  };
+
   const handleEnter = () => {
     if (studentLoading) return;
     const name = entryName.trim();
@@ -453,6 +464,7 @@ Sentence: "${paraphraseInput.trim()}"`;
             inputText: paraphraseInput.trim(),
             outputText: text.trim(),
           });
+          await refreshHistory(studentId);
         } catch (saveError) {
           console.error('History Save Error:', saveError);
           setParaphraseError(
@@ -514,6 +526,7 @@ Keep it concise and actionable.`;
             inputText: `약점: ${weaknessText}\n수업 내용: ${classNotes.trim() || '없음'}`,
             outputText: text.trim(),
           });
+          await refreshHistory(studentId);
         } catch (saveError) {
           console.error('History Save Error:', saveError);
           setPracticeError('히스토리 저장에 실패했어요. 학생 ID를 확인해주세요.');
@@ -589,6 +602,7 @@ ${historySummary}`;
             inputText: todayWrongQuestions.join('\n'),
             outputText: text.trim(),
           });
+          await refreshHistory(studentId);
         } catch (saveError) {
           console.error('History Save Error:', saveError);
           setDailyReviewError(
@@ -736,6 +750,7 @@ ${editorText.trim()}`;
         inputText: editorText.trim(),
         outputText: feedback.trim(),
       });
+      await refreshHistory(studentId);
       setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
       console.error('Writing Submit Error:', error);
