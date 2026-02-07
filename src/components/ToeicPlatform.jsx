@@ -1416,9 +1416,18 @@ ${editorText.trim()}`;
             onChange={(e) => setClassNotes(e.target.value)}
             rows={3}
           />
-          <button type="button" onClick={handlePracticePlan} disabled={practiceLoading}>
+          <button
+            type="button"
+            onClick={handlePracticePlan}
+            disabled={practiceLoading || todayHistory.length === 0}
+          >
             {practiceLoading ? '생성 중...' : '개인 맞춤 복습 플랜 생성'}
           </button>
+          {todayHistory.length === 0 && (
+            <p className="empty-text">
+              오늘 학습 약점 분석을 먼저 진행해야 복습 플랜을 만들 수 있어요.
+            </p>
+          )}
           {practiceError && <p className="error-text">{practiceError}</p>}
           {practiceOutput && (
             <div className="result-box">
