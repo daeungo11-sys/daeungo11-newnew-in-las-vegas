@@ -594,6 +594,14 @@
   outline: none;
 }
 
+[data-theme='dark'] .compare-input {
+  background: #0f172a;
+  color: var(--color-text);
+  border: 1px solid #1f2a44;
+  border-radius: 14px;
+  padding: 12px;
+}
+
 .highlight-word {
   position: relative;
   display: inline-flex;

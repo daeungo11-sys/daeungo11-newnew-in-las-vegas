@@ -107,6 +107,14 @@ function ToeicPlatform() {
         summary: '상황 요약: 계약서 검토 완료 및 회신 요청',
         question: '문제: 계약서 검토 완료 사실과 회신 요청을 작성하세요.',
       },
+      {
+        summary: '상황 요약: 인보이스 발행 완료 및 결제 요청',
+        question: '문제: 인보이스 발행과 결제 요청 이메일을 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 고객 미팅 일정 확정 및 참석 요청',
+        question: '문제: 미팅 일정 확정과 참석 요청을 이메일로 작성하세요.',
+      },
     ],
     'News Article': [
       {
@@ -121,6 +129,14 @@ function ToeicPlatform() {
         summary: '상황 요약: 친환경 캠페인 참여 소식',
         question: '문제: 친환경 캠페인 참여 내용을 기사로 요약하세요.',
       },
+      {
+        summary: '상황 요약: 신규 서비스 출시 발표',
+        question: '문제: 신규 서비스 출시 소식을 기사로 요약하세요.',
+      },
+      {
+        summary: '상황 요약: 파트너십 체결 발표',
+        question: '문제: 파트너십 체결 소식을 기사로 요약하세요.',
+      },
     ],
     Announcement: [
       {
@@ -134,6 +150,14 @@ function ToeicPlatform() {
       {
         summary: '상황 요약: 사무실 이전 일정 공지',
         question: '문제: 사무실 이전 일정과 안내사항을 공지문으로 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 사내 보안 정책 업데이트',
+        question: '문제: 보안 정책 변경 사항을 공지문으로 작성하세요.',
+      },
+      {
+        summary: '상황 요약: 연말 휴무 일정 안내',
+        question: '문제: 연말 휴무 일정을 공지문으로 작성하세요.',
       },
     ],
   };
@@ -1150,7 +1174,7 @@ ${editorText.trim()}`;
       {activeSection === 'paraphrase' && (
       <section id="section-paraphrase" className="platform-section">
         <div className="section-header">
-          <h2>Step 1. 토익 패러프레이징 훈련</h2>
+          <h2>토익 패러프레이징 훈련</h2>
           <p>
             학생이 작성한 문장을 입력하면, 토익에서 자주 쓰는 표현으로 대체 문장을
             제안합니다.
@@ -1183,7 +1207,7 @@ ${editorText.trim()}`;
       {activeSection === 'summary' && (
       <section id="section-summary" className="platform-section">
         <div className="section-header">
-          <h2>Step 1-2. 학습 지문 요약 & 영작 에디터</h2>
+          <h2>학습 지문 요약 & 영작 에디터</h2>
           <p>
             오늘 학습할 지문의 유형과 상황 요약을 확인하고, 핵심 구문을 참고해
             문장을 작성하세요.
@@ -1274,7 +1298,7 @@ ${editorText.trim()}`;
       {activeSection === 'compare' && (
       <section id="section-compare" className="platform-section">
         <div className="section-header">
-          <h2>코드 비교형 패러프레이징 뷰</h2>
+          <h2>Paraphrasing View</h2>
           <p>
             개발자 코드 비교 화면처럼 좌측에는 내 문장, 우측에는 AI 추천 문장을
             나란히 표시합니다.
@@ -1288,7 +1312,7 @@ ${editorText.trim()}`;
           <div className="compare-body">
             <div className="compare-panel">
               <textarea
-                className="compare-input"
+                className="compare-input clean-editor"
                 placeholder="여기에 문장을 입력하세요..."
                 value={compareInput}
                 onChange={(event) => setCompareInput(event.target.value)}
@@ -1336,7 +1360,7 @@ ${editorText.trim()}`;
       {activeSection === 'review' && (
       <section id="section-review" className="platform-section">
         <div className="section-header">
-          <h2>Step 2. 수업 후 반복 학습 + 개인별 약점 보완</h2>
+          <h2>보완학습</h2>
           <p>
             수업 후 바로 복습 루틴과 3일 반복 학습 플랜을 제공하고, 약점에 맞는
             미니 문제로 보완합니다.
