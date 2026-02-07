@@ -337,11 +337,15 @@ function ToeicPlatform() {
 
   const sectionNav = [
     { id: 'history', label: '학습 히스토리' },
-    { id: 'paraphrase', label: 'Paraphrasing Training' },
     { id: 'summary', label: '학습 지문 요약' },
+    { id: 'paraphrase', label: 'Paraphrasing Training' },
     { id: 'compare', label: 'Paraphrasing View' },
     { id: 'review', label: '보완학습' },
   ];
+  const visibleSectionNav =
+    activeView === 'teacher'
+      ? sectionNav.filter((item) => item.id !== 'history')
+      : sectionNav;
 
   const handleSectionNav = (id) => {
     setActiveSection(id);
@@ -352,6 +356,12 @@ function ToeicPlatform() {
       }
     });
   };
+
+  useEffect(() => {
+    if (activeView === 'teacher' && activeSection === 'history') {
+      setActiveSection('paraphrase');
+    }
+  }, [activeView, activeSection]);
 
   const handlePassageSelect = (type) => {
     const options = passageOptions[type];
@@ -926,20 +936,18 @@ ${editorText.trim()}`;
         </div>
       </header>
 
-      {activeView === 'student' && (
-        <div className="section-nav">
-          {sectionNav.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={activeSection === item.id ? 'active' : ''}
-              onClick={() => handleSectionNav(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="section-nav">
+        {visibleSectionNav.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={activeSection === item.id ? 'active' : ''}
+            onClick={() => handleSectionNav(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
 
       <div className="view-toggle">
         <button
@@ -1099,7 +1107,7 @@ ${editorText.trim()}`;
         </>
       )}
 
-      {activeSection === 'history' && (
+      {activeView === 'student' && activeSection === 'history' && (
         <section className="platform-section">
             <div className="section-header">
               <h2>내 학습 히스토리</h2>
@@ -1171,39 +1179,6 @@ ${editorText.trim()}`;
               )}
             </div>
           </section>
-      )}
-
-      {activeSection === 'paraphrase' && (
-      <section id="section-paraphrase" className="platform-section">
-        <div className="section-header">
-          <h2>토익 패러프레이징 훈련</h2>
-          <p>
-            학생이 작성한 문장을 입력하면, 토익에서 자주 쓰는 표현으로 대체 문장을
-            제안합니다.
-          </p>
-        </div>
-        <form className="card document-card" onSubmit={handleParaphraseSubmit}>
-          <label htmlFor="paraphrase-input">학생 문장 입력</label>
-          <textarea
-            id="paraphrase-input"
-            placeholder="예: Our company decided to postpone the meeting."
-            value={paraphraseInput}
-            onChange={(e) => setParaphraseInput(e.target.value)}
-            rows={4}
-          />
-          <button type="submit" disabled={paraphraseLoading}>
-            {paraphraseLoading ? '분석 중...' : '토익 패러프레이징 제안 받기'}
-          </button>
-          {paraphraseError && <p className="error-text">{paraphraseError}</p>}
-          {paraphraseNotice && <p className="info-text">{paraphraseNotice}</p>}
-          {paraphraseOutput && (
-            <div className="result-box">
-              <h3>추천 대체 문장</h3>
-              <pre>{paraphraseOutput}</pre>
-            </div>
-          )}
-        </form>
-      </section>
       )}
 
       {activeSection === 'summary' && (
@@ -1294,6 +1269,39 @@ ${editorText.trim()}`;
             </div>
           </div>
         </div>
+      </section>
+      )}
+
+      {activeSection === 'paraphrase' && (
+      <section id="section-paraphrase" className="platform-section">
+        <div className="section-header">
+          <h2>토익 패러프레이징 훈련</h2>
+          <p>
+            학생이 작성한 문장을 입력하면, 토익에서 자주 쓰는 표현으로 대체 문장을
+            제안합니다.
+          </p>
+        </div>
+        <form className="card document-card" onSubmit={handleParaphraseSubmit}>
+          <label htmlFor="paraphrase-input">학생 문장 입력</label>
+          <textarea
+            id="paraphrase-input"
+            placeholder="예: Our company decided to postpone the meeting."
+            value={paraphraseInput}
+            onChange={(e) => setParaphraseInput(e.target.value)}
+            rows={4}
+          />
+          <button type="submit" disabled={paraphraseLoading}>
+            {paraphraseLoading ? '분석 중...' : '토익 패러프레이징 제안 받기'}
+          </button>
+          {paraphraseError && <p className="error-text">{paraphraseError}</p>}
+          {paraphraseNotice && <p className="info-text">{paraphraseNotice}</p>}
+          {paraphraseOutput && (
+            <div className="result-box">
+              <h3>추천 대체 문장</h3>
+              <pre>{paraphraseOutput}</pre>
+            </div>
+          )}
+        </form>
       </section>
       )}
 
