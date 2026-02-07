@@ -746,8 +746,8 @@ ${editorText.trim()}`;
       setEditorFeedback(feedback.trim());
 
       await saveStudentHistory(studentId, {
-        activityType: 'WRITING_SUBMISSION',
-        inputText: editorText.trim(),
+        activityType: 'SUMMARY_WRITING',
+        inputText: `학습 지문 영작: ${editorText.trim()}`,
         outputText: feedback.trim(),
       });
       await refreshHistory(studentId);
