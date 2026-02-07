@@ -188,11 +188,7 @@ function ToeicPlatform() {
   );
   const todayWrongQuestions = useMemo(() => {
     if (todayHistory.length === 0) {
-      return [
-        '문제 1: 회의 일정 변경 안내 문장 작성',
-        '문제 2: inform/notify 차이 활용 문장',
-        '문제 3: 전치사 in/on/at 선택',
-      ];
+      return [];
     }
     return todayHistory.map(
       (item, index) =>
@@ -545,6 +541,12 @@ Keep it concise and actionable.`;
     setDailyReviewLoading(true);
     setDailyReviewError('');
     setDailyReviewOutput('');
+
+    if (todayHistory.length === 0) {
+      setDailyReviewError('오늘 학습 기록이 없어서 분석할 수 없어요.');
+      setDailyReviewLoading(false);
+      return;
+    }
 
     const historySummary =
       todayHistory.length > 0
@@ -1373,14 +1375,16 @@ ${editorText.trim()}`;
               <span className="review-helper">{todayKey} 기준</span>
             </div>
             <ul className="wrong-list">
-              {todayWrongQuestions.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {todayWrongQuestions.length > 0 ? (
+                todayWrongQuestions.map((item) => <li key={item}>{item}</li>)
+              ) : (
+                <li>오늘 학습 기록이 없습니다.</li>
+              )}
             </ul>
             <button
               type="button"
               onClick={handleDailyReview}
-              disabled={dailyReviewLoading}
+              disabled={dailyReviewLoading || todayHistory.length === 0}
             >
               {dailyReviewLoading ? '분석 중...' : '오늘 학습 약점 분석'}
             </button>
