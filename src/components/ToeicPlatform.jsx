@@ -797,6 +797,9 @@ ${historySummary}`;
     },
     { text: '.' },
   ];
+  const aiRecommendationReasons = aiSentenceParts
+    .filter((part) => part.highlight)
+    .map((part) => part.tooltip);
 
   const summaryCards = [
     { label: '제출률', value: '0%', helper: '지난 7일 기준' },
@@ -1555,6 +1558,20 @@ ${editorText.trim()}`;
                   : '내 문장을 입력하면 AI 추천 문장이 표시됩니다.'}
               </p>
             </div>
+          </div>
+          <div className="result-box">
+            <h3>AI 추천 문장 이유</h3>
+            {compareInput.trim() ? (
+              <ul className="explain-list">
+                {aiRecommendationReasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-text">
+                내 문장을 입력하면 AI 추천 이유가 함께 표시됩니다.
+              </p>
+            )}
           </div>
         </div>
       </section>
