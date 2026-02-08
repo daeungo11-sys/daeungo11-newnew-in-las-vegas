@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import Tesseract from 'tesseract.js';
 import { generateText } from '../services/groqApi';
 import {
   createStudent,
@@ -93,6 +94,7 @@ function ToeicPlatform() {
   const [converterOutput, setConverterOutput] = useState('');
   const [converterLoading, setConverterLoading] = useState(false);
   const [converterError, setConverterError] = useState('');
+  const [converterNotice, setConverterNotice] = useState('');
   const [passageType, setPassageType] = useState('Email');
   const [passageSummary, setPassageSummary] = useState(
     '상황 요약: 회의 일정 변경 안내'
@@ -254,13 +256,22 @@ function ToeicPlatform() {
     return fallbackMessage;
   };
 
+  const normalizeHistoryItems = (items) =>
+    (Array.isArray(items) ? items : []).map((item) => ({
+      ...item,
+      activityType: item.activityType ?? item.activity_type,
+      inputText: item.inputText ?? item.input_text,
+      outputText: item.outputText ?? item.output_text,
+      createdAt: item.createdAt ?? item.created_at,
+    }));
+
   const loadHistoryForId = async (id) => {
     if (!id || historyLoading) return;
     setHistoryLoading(true);
     setHistoryError('');
     try {
       const items = await fetchStudentHistory(id, 3);
-      setHistoryItems(items);
+      setHistoryItems(normalizeHistoryItems(items));
       setHistoryLoaded(true);
     } catch (error) {
       console.error('History Load Error:', error);
@@ -274,7 +285,7 @@ function ToeicPlatform() {
     if (!id) return;
     try {
       const items = await fetchStudentHistory(id, 3);
-      setHistoryItems(items);
+      setHistoryItems(normalizeHistoryItems(items));
       setHistoryLoaded(true);
     } catch (error) {
       console.error('History Refresh Error:', error);
@@ -370,7 +381,7 @@ function ToeicPlatform() {
   const visibleSectionNav =
     activeView === 'teacher'
       ? sectionNav.filter((item) => item.id !== 'history')
-      : sectionNav;
+      : sectionNav.filter((item) => item.id !== 'converter');
 
   const handleSectionNav = (id) => {
     setActiveSection(id);
@@ -385,6 +396,9 @@ function ToeicPlatform() {
   useEffect(() => {
     if (activeView === 'teacher' && activeSection === 'history') {
       setActiveSection('paraphrase');
+    }
+    if (activeView === 'student' && activeSection === 'converter') {
+      setActiveSection('history');
     }
   }, [activeView, activeSection]);
 
@@ -409,12 +423,18 @@ function ToeicPlatform() {
     return text;
   };
 
+  const readImageText = async (file) => {
+    const { data } = await Tesseract.recognize(file, 'eng+kor');
+    return data?.text || '';
+  };
+
   const handleConverterFile = async (file) => {
     if (!file) return;
     setConverterFile(file);
     setConverterText('');
     setConverterOutput('');
     setConverterError('');
+    setConverterNotice('');
     try {
       if (file.type === 'application/pdf') {
         const text = await readPdfText(file);
@@ -422,12 +442,26 @@ function ToeicPlatform() {
       } else if (file.type.startsWith('text/')) {
         const text = await file.text();
         setConverterText(text.trim());
+      } else if (file.type.startsWith('image/')) {
+        setConverterLoading(true);
+        setConverterNotice('이미지에서 텍스트를 추출 중이에요...');
+        const text = await readImageText(file);
+        const trimmed = text.trim();
+        if (!trimmed) {
+          setConverterError(
+            '이미지에서 텍스트를 찾지 못했어요. 글자가 선명한지 확인해주세요.'
+          );
+        }
+        setConverterText(trimmed);
       } else {
         setConverterError('PDF 또는 텍스트 파일만 지원합니다.');
       }
     } catch (error) {
       console.error('Converter File Error:', error);
       setConverterError('파일을 읽는 중 오류가 발생했어요.');
+    } finally {
+      setConverterLoading(false);
+      setConverterNotice('');
     }
   };
 
@@ -1393,7 +1427,7 @@ ${editorText.trim()}`;
       </section>
       )}
 
-      {activeSection === 'converter' && (
+      {activeView === 'teacher' && activeSection === 'converter' && (
       <section id="section-converter" className="platform-section">
         <div className="section-header">
           <h2>AI 기반 교재 변환기</h2>
@@ -1404,12 +1438,13 @@ ${editorText.trim()}`;
           <input
             id="converter-file"
             type="file"
-            accept=".pdf,.txt"
+            accept=".pdf,.txt,.png,.jpg,.jpeg"
             onChange={(event) => handleConverterFile(event.target.files?.[0])}
           />
           {converterFile && (
             <p className="info-text">선택된 파일: {converterFile.name}</p>
           )}
+          {converterNotice && <p className="info-text">{converterNotice}</p>}
           {converterError && <p className="error-text">{converterError}</p>}
           {converterText && (
             <div className="result-box">
