@@ -380,7 +380,7 @@ function ToeicPlatform() {
   ];
   const visibleSectionNav =
     activeView === 'teacher'
-      ? sectionNav.filter((item) => item.id !== 'history')
+      ? sectionNav
       : sectionNav.filter((item) => item.id !== 'converter');
 
   const handleSectionNav = (id) => {
@@ -394,9 +394,6 @@ function ToeicPlatform() {
   };
 
   useEffect(() => {
-    if (activeView === 'teacher' && activeSection === 'history') {
-      setActiveSection('paraphrase');
-    }
     if (activeView === 'student' && activeSection === 'converter') {
       setActiveSection('history');
     }
@@ -1118,7 +1115,7 @@ ${editorText.trim()}`;
         </button>
       </div>
 
-      {activeView === 'teacher' && (
+      {activeView === 'teacher' && activeSection === 'history' && (
         <>
           <section id="section-history" className="platform-section">
             <div className="section-header">
