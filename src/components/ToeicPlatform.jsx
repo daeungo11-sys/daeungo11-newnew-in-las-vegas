@@ -259,7 +259,7 @@ function ToeicPlatform() {
     setHistoryLoading(true);
     setHistoryError('');
     try {
-      const items = await fetchStudentHistory(id, 10);
+      const items = await fetchStudentHistory(id, 3);
       setHistoryItems(items);
       setHistoryLoaded(true);
     } catch (error) {
@@ -273,7 +273,7 @@ function ToeicPlatform() {
   const refreshHistory = async (id = studentId) => {
     if (!id) return;
     try {
-      const items = await fetchStudentHistory(id, 10);
+      const items = await fetchStudentHistory(id, 3);
       setHistoryItems(items);
       setHistoryLoaded(true);
     } catch (error) {
