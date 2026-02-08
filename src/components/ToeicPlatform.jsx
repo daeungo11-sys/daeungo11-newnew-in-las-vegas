@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { generateText } from '../services/groqApi';
 import {
   createStudent,
@@ -85,6 +87,12 @@ function ToeicPlatform() {
 
   const [activeTooltip, setActiveTooltip] = useState('');
   const [activeSection, setActiveSection] = useState('history');
+
+  const [converterFile, setConverterFile] = useState(null);
+  const [converterText, setConverterText] = useState('');
+  const [converterOutput, setConverterOutput] = useState('');
+  const [converterLoading, setConverterLoading] = useState(false);
+  const [converterError, setConverterError] = useState('');
   const [passageType, setPassageType] = useState('Email');
   const [passageSummary, setPassageSummary] = useState(
     '상황 요약: 회의 일정 변경 안내'
@@ -173,6 +181,10 @@ function ToeicPlatform() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -350,6 +362,7 @@ function ToeicPlatform() {
   const sectionNav = [
     { id: 'history', label: '학습 히스토리' },
     { id: 'summary', label: '학습 지문 요약' },
+    { id: 'converter', label: '교재 변환기' },
     { id: 'paraphrase', label: 'Paraphrasing Training' },
     { id: 'compare', label: 'Paraphrasing View' },
     { id: 'review', label: '보완학습' },
@@ -382,6 +395,79 @@ function ToeicPlatform() {
     setPassageType(type);
     setPassageSummary(pick.summary);
     setDailyQuestion(pick.question);
+  };
+
+  const readPdfText = async (file) => {
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    let text = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      text += content.items.map((item) => item.str).join(' ') + '\n';
+    }
+    return text;
+  };
+
+  const handleConverterFile = async (file) => {
+    if (!file) return;
+    setConverterFile(file);
+    setConverterText('');
+    setConverterOutput('');
+    setConverterError('');
+    try {
+      if (file.type === 'application/pdf') {
+        const text = await readPdfText(file);
+        setConverterText(text.trim());
+      } else if (file.type.startsWith('text/')) {
+        const text = await file.text();
+        setConverterText(text.trim());
+      } else {
+        setConverterError('PDF 또는 텍스트 파일만 지원합니다.');
+      }
+    } catch (error) {
+      console.error('Converter File Error:', error);
+      setConverterError('파일을 읽는 중 오류가 발생했어요.');
+    }
+  };
+
+  const handleConvert = async () => {
+    if (converterLoading) return;
+    if (!converterText.trim()) {
+      setConverterError('텍스트가 비어 있어요. 파일을 다시 확인해주세요.');
+      return;
+    }
+    setConverterLoading(true);
+    setConverterError('');
+    setConverterOutput('');
+
+    const MAX_CHARS = 4000;
+    const input = converterText.trim().slice(0, MAX_CHARS);
+    const prompt = `You are a TOEIC教材 변환기.
+Given the input text, produce:
+1) 단어장 (영단어 - 한국어 뜻 10~15개)
+2) 퀴즈 5문항 (객관식 또는 단답형)
+3) 본문 요약 (한국어 4~5문장)
+출력은 섹션 제목을 포함해서 한국어로 정리하세요.
+
+입력 텍스트:
+${input}`;
+
+    try {
+      const text = await generateText(prompt, {
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.4,
+        max_tokens: 900,
+      });
+      setConverterOutput(text.trim());
+    } catch (error) {
+      console.error('Converter Error:', error);
+      setConverterError(
+        getFriendlyError(error, '변환에 실패했어요. 잠시 후 다시 시도해주세요.')
+      );
+    } finally {
+      setConverterLoading(false);
+    }
   };
 
   const handleFindStudent = async () => {
@@ -763,6 +849,7 @@ ${editorText.trim()}`;
       setHistoryItems((prev) => [newItem, ...prev]);
       setHistoryLoaded(true);
       await refreshHistory(studentId);
+      setActiveView('student');
       setActiveSection('history');
       setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
@@ -1302,6 +1389,43 @@ ${editorText.trim()}`;
               </div>
             </div>
           </div>
+        </div>
+      </section>
+      )}
+
+      {activeSection === 'converter' && (
+      <section id="section-converter" className="platform-section">
+        <div className="section-header">
+          <h2>AI 기반 교재 변환기</h2>
+          <p>교재(PDF/텍스트)를 업로드하면 단어장, 퀴즈, 요약을 생성합니다.</p>
+        </div>
+        <div className="card">
+          <label htmlFor="converter-file">파일 업로드</label>
+          <input
+            id="converter-file"
+            type="file"
+            accept=".pdf,.txt"
+            onChange={(event) => handleConverterFile(event.target.files?.[0])}
+          />
+          {converterFile && (
+            <p className="info-text">선택된 파일: {converterFile.name}</p>
+          )}
+          {converterError && <p className="error-text">{converterError}</p>}
+          {converterText && (
+            <div className="result-box">
+              <h3>추출된 텍스트 (일부)</h3>
+              <pre>{converterText.slice(0, 800)}</pre>
+            </div>
+          )}
+          <button type="button" onClick={handleConvert} disabled={converterLoading}>
+            {converterLoading ? '변환 중...' : '교재 변환 생성'}
+          </button>
+          {converterOutput && (
+            <div className="result-box">
+              <h3>변환 결과</h3>
+              <pre>{converterOutput}</pre>
+            </div>
+          )}
         </div>
       </section>
       )}

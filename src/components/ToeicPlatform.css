@@ -160,6 +160,12 @@
   color: var(--color-text);
 }
 
+[data-theme='dark'] .card input[type='file'] {
+  background: #0f172a;
+  border-color: #1f2a44;
+  color: var(--color-text);
+}
+
 [data-theme='dark'] .compare-card,
 [data-theme='dark'] .compare-panel {
   background: #0f172a;
@@ -696,6 +702,14 @@
   font-family: inherit;
   background: #f8faff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card input[type='file'] {
+  border: 1px dashed #d6ddff;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 13px;
+  background: #f8faff;
 }
 
 .card textarea:focus,
