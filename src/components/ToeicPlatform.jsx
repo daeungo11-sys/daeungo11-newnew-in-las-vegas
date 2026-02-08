@@ -79,6 +79,7 @@ function ToeicPlatform() {
   const [editorSubmitting, setEditorSubmitting] = useState(false);
   const [editorSuccess, setEditorSuccess] = useState('');
   const [editorFeedback, setEditorFeedback] = useState('');
+  const [editorSubmission, setEditorSubmission] = useState('');
 
   const [compareInput, setCompareInput] = useState('');
 
@@ -725,6 +726,7 @@ ${historySummary}`;
     setEditorError('');
     setEditorSuccess('');
     setEditorFeedback('');
+    setEditorSubmission('');
     try {
       if (!studentId) {
         setEditorError('학생 ID가 없어요. 먼저 학생 ID를 생성하거나 입력해주세요.');
@@ -744,13 +746,24 @@ ${editorText.trim()}`;
       });
 
       setEditorFeedback(feedback.trim());
+      setEditorSubmission(editorText.trim());
 
       await saveStudentHistory(studentId, {
         activityType: 'SUMMARY_WRITING',
         inputText: `학습 지문 영작: ${editorText.trim()}`,
-        outputText: feedback.trim(),
+        outputText: `제출 내용:\n${editorText.trim()}\n\nAI 피드백:\n${feedback.trim()}`,
       });
+      const newItem = {
+        id: `local-${Date.now()}`,
+        activityType: 'SUMMARY_WRITING',
+        inputText: `학습 지문 영작: ${editorText.trim()}`,
+        outputText: `제출 내용:\n${editorText.trim()}\n\nAI 피드백:\n${feedback.trim()}`,
+        createdAt: new Date().toISOString(),
+      };
+      setHistoryItems((prev) => [newItem, ...prev]);
+      setHistoryLoaded(true);
       await refreshHistory(studentId);
+      setActiveSection('history');
       setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
       console.error('Writing Submit Error:', error);
@@ -1266,6 +1279,12 @@ ${editorText.trim()}`;
                 </div>
                 {editorError && <p className="error-text">{editorError}</p>}
                 {editorSuccess && <p className="success-text">{editorSuccess}</p>}
+                {editorSubmission && (
+                  <div className="result-box">
+                    <h3>제출 내용</h3>
+                    <pre>{editorSubmission}</pre>
+                  </div>
+                )}
                 {editorFeedback && (
                   <div className="result-box">
                     <h3>AI 피드백</h3>
