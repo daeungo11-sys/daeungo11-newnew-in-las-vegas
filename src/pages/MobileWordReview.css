@@ -1,0 +1,318 @@
+/* 모바일 단어 복습 - 터치 친화, 전체 화면 */
+.mobile-review.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+  color: #e0e7ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-review-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+
+.mobile-review-card h1 {
+  font-size: 1.75rem;
+  margin-bottom: 8px;
+}
+
+.mobile-review-card p {
+  margin-bottom: 16px;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.mobile-review-card input {
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.mobile-review-card input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mobile-review-card input:focus {
+  outline: none;
+  border-color: #818cf8;
+}
+
+.mobile-review-user {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.mobile-review-count {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.mobile-review-error {
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.mobile-review-hint {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-top: 8px;
+}
+
+.mobile-review-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  margin: 10px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mobile-review-btn:active {
+  transform: scale(0.98);
+}
+
+.mobile-review-btn.primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.mobile-review-btn.secondary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
+}
+
+.mobile-review-btn.outline {
+  background: transparent;
+  color: #c7d2fe;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  margin-top: 20px;
+}
+
+/* 플래시카드 */
+.flashcard-container {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.flashcard-progress {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+.flashcard {
+  perspective: 1200px;
+  margin-bottom: 24px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  position: absolute;
+  width: 100%;
+  min-height: 220px;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.flashcard-front {
+  background: linear-gradient(145deg, #4338ca 0%, #6366f1 100%);
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(67, 56, 202, 0.4);
+}
+
+.flashcard-back {
+  background: linear-gradient(145deg, #0e7490 0%, #06b6d4 100%);
+  color: #fff;
+  transform: rotateY(180deg);
+  box-shadow: 0 16px 40px rgba(6, 182, 212, 0.4);
+}
+
+.flashcard-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.flashcard-word,
+.flashcard-meaning {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.flashcard-tap {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 16px;
+}
+
+.flashcard-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.flashcard-actions button {
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e7ff;
+  cursor: pointer;
+}
+
+.flashcard-actions button:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 퀴즈 */
+.quiz-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.quiz-progress {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.quiz-question {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 28px 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.quiz-word {
+  font-size: 1.75rem;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.quiz-prompt {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-option {
+  padding: 18px 20px;
+  font-size: 1.05rem;
+  text-align: left;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e7ff;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.quiz-option:not(:disabled):active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.quiz-option.correct {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.2);
+  color: #fff;
+}
+
+.quiz-option.wrong {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fff;
+}
+
+.quiz-option:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.quiz-feedback {
+  margin-top: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.quiz-feedback.correct {
+  color: #86efac;
+}
+
+.quiz-feedback.wrong {
+  color: #fca5a5;
+}
+
+.quiz-container .mobile-review-btn {
+  margin-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .mobile-review.app {
+    padding: 16px 12px;
+  }
+  .flashcard-word,
+  .flashcard-meaning {
+    font-size: 1.35rem;
+  }
+  .quiz-word {
+    font-size: 1.5rem;
+  }
+}

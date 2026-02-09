@@ -1,0 +1,11 @@
+{
+  "name": "TOEIC 단어 복습",
+  "short_name": "단어 복습",
+  "description": "학원에서 배운 단어를 이동 중·집에서 게임처럼 복습",
+  "start_url": "/review",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#4338ca",
+  "orientation": "portrait-primary",
+  "icons": []
+}
