@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
       const { data, error } = await supabaseAdmin
         .from('students')
-        .insert({ id, name, email })
+        .insert({ id, name, email, points: 0 })
         .select()
         .single();
 

@@ -33,6 +33,20 @@ const BADGE_LABELS = {
   streak_3: '3일 연속',
 };
 
+/** 히스토리 결과 표시 시 약점 보완용 미니 문제·답안 구간 제거 */
+function formatHistoryOutput(text) {
+  if (!text || typeof text !== 'string') return '';
+  let s = text;
+  if (s.includes('약점 보완용 미니 문제')) {
+    s = s.split('약점 보완용 미니 문제')[0].trim();
+  }
+  if (s.includes('답안')) {
+    const idx = s.indexOf('답안');
+    s = s.slice(0, idx).trim();
+  }
+  return s;
+}
+
 const WEAKNESS_OPTIONS = [
   '문법: 시제/수일치',
   '문법: 가정법/조동사',
@@ -276,6 +290,9 @@ function ToeicPlatform() {
     if (message.includes("Could not find the table 'public.student_activities'")) {
       return 'Supabase student_activities 테이블이 없어요. SQL Editor에서 테이블을 생성해주세요.';
     }
+    if (message.includes('Failed to fetch') || message.toLowerCase().includes('network')) {
+      return 'Supabase 서버에 연결할 수 없어요. Vercel 환경변수(VITE_SUPABASE_FUNCTIONS_URL, VITE_SUPABASE_ANON_KEY) 확인 후, Supabase에서 get-leaderboard 함수를 배포했는지 확인해주세요.';
+    }
     return fallbackMessage;
   };
 
@@ -405,6 +422,7 @@ function ToeicPlatform() {
 
   const sectionNav = [
     { id: 'history', label: '학습 히스토리' },
+    { id: 'today', label: '오늘 배운 내용' },
     { id: 'ranking', label: '학원 랭킹' },
     { id: 'vocabulary', label: '내 단어장' },
     { id: 'summary', label: '학습 지문 요약' },
@@ -441,7 +459,7 @@ function ToeicPlatform() {
     fetchLeaderboard(50)
       .then((list) => setLeaderboard(Array.isArray(list) ? list : []))
       .catch((err) => {
-        setLeaderboardError(err?.message || '랭킹을 불러오지 못했어요.');
+        setLeaderboardError(getFriendlyError(err, '랭킹을 불러오지 못했어요.'));
         setLeaderboard([]);
       })
       .finally(() => setLeaderboardLoading(false));
@@ -1248,6 +1266,51 @@ ${editorText.trim()}`;
         </button>
       </div>
 
+      {activeSection === 'today' && (
+        <section id="section-today" className="platform-section">
+          <div className="section-header">
+            <h2>오늘 배운 내용</h2>
+            <p>
+              {activeView === 'student'
+                ? '오늘 진행한 학습 활동을 모아봤어요.'
+                : '해당 학생의 오늘 학습 활동이에요. 학생 ID로 히스토리를 먼저 조회하세요.'}
+            </p>
+          </div>
+          <div className="card">
+            {!historyLoaded && (
+              <p className="empty-text">
+                {activeView === 'student'
+                  ? '로그인 후 최근 히스토리를 조회하면 오늘 배운 내용이 여기에 표시돼요.'
+                  : '학생별 학습 히스토리에서 학생 ID를 입력하고 「최근 히스토리 조회」를 누른 뒤 이 메뉴를 확인하세요.'}
+              </p>
+            )}
+            {historyLoaded && todayHistory.length === 0 && (
+              <p className="empty-text">오늘 기록된 학습이 없어요.</p>
+            )}
+            {historyLoaded && todayHistory.length > 0 && (
+              <div className="today-learned-list">
+                <p className="today-learned-count">{todayKey} · 총 {todayHistory.length}건</p>
+                <ul>
+                  {todayHistory.map((item) => (
+                    <li key={item.id} className="today-learned-item">
+                      <div className="today-learned-meta">
+                        <span className="today-learned-type">{item.activityType}</span>
+                        <span className="today-learned-time">{formatDate(item.createdAt)}</span>
+                      </div>
+                      <p className="today-learned-input">{item.inputText?.slice(0, 200)}{(item.inputText?.length || 0) > 200 ? '...' : ''}</p>
+                      <details className="today-learned-details">
+                        <summary>자세히 보기</summary>
+                        <pre>{formatHistoryOutput(item.outputText)}</pre>
+                      </details>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {activeSection === 'ranking' && (
         <section id="section-ranking" className="platform-section">
           <div className="section-header">
@@ -1468,7 +1531,7 @@ ${editorText.trim()}`;
                         <p className="history-input">{item.inputText}</p>
                         <details className="history-details">
                           <summary>결과 보기</summary>
-                          <pre>{item.outputText}</pre>
+                          <pre>{formatHistoryOutput(item.outputText)}</pre>
                         </details>
                       </li>
                     ))}
@@ -1564,7 +1627,7 @@ ${editorText.trim()}`;
                         <p className="history-input">{item.inputText}</p>
                         <details className="history-details">
                           <summary>결과 보기</summary>
-                          <pre>{item.outputText}</pre>
+                          <pre>{formatHistoryOutput(item.outputText)}</pre>
                         </details>
                       </li>
                     ))}
