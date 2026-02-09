@@ -1598,17 +1598,17 @@ ${editorText.trim()}`;
               </div>
               {historyError && <p className="error-text">{historyError}</p>}
               {historyItems.length > 0 && (
-                <div className="history-list">
-                  <h3>최근 학습 히스토리</h3>
-                  <ul>
+                <div className="recent-history">
+                  <h3 className="recent-history-title">최근 학습 히스토리</h3>
+                  <ul className="recent-history-items">
                     {historyItems.map((item) => (
-                      <li key={item.id}>
-                        <div className="history-meta">
-                          <span className="history-type">{item.activityType}</span>
-                          <span>{formatDate(item.createdAt)}</span>
+                      <li key={item.id} className="recent-history-item">
+                        <div className="recent-history-head">
+                          <span className="recent-history-type">{item.activityType}</span>
+                          <span className="recent-history-date">{formatDate(item.createdAt)}</span>
                         </div>
-                        <p className="history-input">{item.inputText}</p>
-                        <details className="history-details">
+                        <p className="recent-history-body">{item.inputText}</p>
+                        <details className="recent-history-result">
                           <summary>결과 보기</summary>
                           <pre>{formatHistoryOutput(item.outputText)}</pre>
                         </details>
@@ -1694,17 +1694,17 @@ ${editorText.trim()}`;
               {studentError && <p className="error-text">{studentError}</p>}
               {historyError && <p className="error-text">{historyError}</p>}
               {historyItems.length > 0 && (
-                <div className="history-list">
-                  <h3>최근 학습 히스토리</h3>
-                  <ul>
+                <div className="recent-history">
+                  <h3 className="recent-history-title">최근 학습 히스토리</h3>
+                  <ul className="recent-history-items">
                     {historyItems.map((item) => (
-                      <li key={item.id}>
-                        <div className="history-meta">
-                          <span className="history-type">{item.activityType}</span>
-                          <span>{formatDate(item.createdAt)}</span>
+                      <li key={item.id} className="recent-history-item">
+                        <div className="recent-history-head">
+                          <span className="recent-history-type">{item.activityType}</span>
+                          <span className="recent-history-date">{formatDate(item.createdAt)}</span>
                         </div>
-                        <p className="history-input">{item.inputText}</p>
-                        <details className="history-details">
+                        <p className="recent-history-body">{item.inputText}</p>
+                        <details className="recent-history-result">
                           <summary>결과 보기</summary>
                           <pre>{formatHistoryOutput(item.outputText)}</pre>
                         </details>

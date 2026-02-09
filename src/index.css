@@ -10,6 +10,12 @@
   --color-indigo-soft: #eef2ff;
   --color-green-soft: #e6f7ee;
   --color-green: #22c55e;
+  /* 대시보드·오늘 배운 내용 카드 (라이트) */
+  --summary-card-bg: #ffffff;
+  --summary-card-text: #0f172a;
+  --summary-card-text-muted: #334155;
+  --summary-card-border: #e2e8f0;
+  --summary-card-pre-bg: #f1f5f9;
 }
 
 [data-theme='dark'] {
@@ -22,6 +28,12 @@
   --color-indigo-soft: #1f2a44;
   --color-green-soft: #123824;
   --color-green: #34d399;
+  /* 대시보드·오늘 배운 내용 카드 (다크: 어두운 배경 + 밝은 글자) */
+  --summary-card-bg: #1e1e1e;
+  --summary-card-text: #f5f5f5;
+  --summary-card-text-muted: #a3a3a3;
+  --summary-card-border: #404040;
+  --summary-card-pre-bg: #2a2a2a;
 }
 
 * {
