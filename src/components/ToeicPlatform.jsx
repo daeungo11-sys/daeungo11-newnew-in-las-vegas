@@ -112,6 +112,8 @@ function ToeicPlatform() {
 
   const [activeTooltip, setActiveTooltip] = useState('');
   const [activeSection, setActiveSection] = useState('history');
+  const [isTeacherEntry, setIsTeacherEntry] = useState(false);
+  const [showHomeScreen, setShowHomeScreen] = useState(false);
 
   const [studentPoints, setStudentPoints] = useState(0);
   const [studentBadges, setStudentBadges] = useState([]);
@@ -390,6 +392,10 @@ function ToeicPlatform() {
   };
 
   const handleGoHome = () => {
+    setShowHomeScreen(true);
+  };
+
+  const handleLogout = () => {
     setStudentName('');
     setStudentId('');
     setEntryName('');
@@ -418,23 +424,41 @@ function ToeicPlatform() {
     setVocabularyError('');
     setVocabWord('');
     setVocabMeaning('');
+    setIsTeacherEntry(false);
+    setShowHomeScreen(true);
   };
 
-  const sectionNav = [
-    { id: 'history', label: '학습 히스토리' },
-    { id: 'today', label: '오늘 배운 내용' },
-    { id: 'ranking', label: '학원 랭킹' },
-    { id: 'vocabulary', label: '내 단어장' },
-    { id: 'summary', label: '학습 지문 요약' },
-    { id: 'converter', label: '교재 변환기' },
-    { id: 'paraphrase', label: 'Paraphrasing Training' },
-    { id: 'compare', label: 'Paraphrasing View' },
-    { id: 'review', label: '보완학습' },
+  const sectionNavById = {
+    history: { id: 'history', label: '학습 히스토리' },
+    today: { id: 'today', label: '오늘 배운 내용' },
+    ranking: { id: 'ranking', label: '학원 랭킹' },
+    vocabulary: { id: 'vocabulary', label: '내 단어장' },
+    summary: { id: 'summary', label: '학습 지문 요약' },
+    converter: { id: 'converter', label: '교재 변환기' },
+    paraphrase: { id: 'paraphrase', label: 'Paraphrasing Training' },
+    compare: { id: 'compare', label: 'Paraphrasing View' },
+    review: { id: 'review', label: '보완학습' },
+  };
+  const teacherSectionOrder = [
+    'today',
+    'history',
+    'ranking',
+    'converter',
   ];
-  const visibleSectionNav =
-    activeView === 'teacher'
-      ? sectionNav.filter((item) => item.id !== 'vocabulary')
-      : sectionNav.filter((item) => item.id !== 'converter');
+  const studentSectionOrder = [
+    'today',
+    'history',
+    'summary',
+    'paraphrase',
+    'compare',
+    'review',
+    'ranking',
+    'vocabulary',
+  ];
+  const visibleSectionNav = (activeView === 'teacher'
+    ? teacherSectionOrder
+    : studentSectionOrder
+  ).map((id) => sectionNavById[id]);
 
   const handleSectionNav = (id) => {
     setActiveSection(id);
@@ -449,6 +473,12 @@ function ToeicPlatform() {
   useEffect(() => {
     if (activeView === 'student' && activeSection === 'converter') {
       setActiveSection('history');
+    }
+    if (
+      activeView === 'teacher' &&
+      ['vocabulary', 'summary', 'paraphrase', 'compare', 'review'].includes(activeSection)
+    ) {
+      setActiveSection('today');
     }
   }, [activeView, activeSection]);
 
@@ -1032,9 +1062,13 @@ ${editorText.trim()}`;
     }
   };
 
-  const hasAccess = Boolean(studentName.trim() && studentId.trim());
+  const hasAccess = Boolean(
+    (studentName.trim() && studentId.trim()) || isTeacherEntry
+  );
+  const showEntryScreen = !hasAccess || showHomeScreen;
 
-  if (!hasAccess) {
+  if (showEntryScreen) {
+    const studentLoggedIn = Boolean(studentName.trim() && studentId.trim());
     return (
       <div className="toeic-platform">
         <div className="top-actions">
@@ -1045,7 +1079,7 @@ ${editorText.trim()}`;
         <header className="platform-hero entry-hero">
           <div className="hero-content">
             <h1>TOEIC Paraphrasing & Review Platform</h1>
-            <p>내 학습 히스토리를 불러오기 위해 이름과 학생 ID를 입력하세요.</p>
+            <p>학생은 로그인, 강사는 강사 창에서 시작하세요.</p>
           </div>
           <div className="hero-badges">
             <span>학습 히스토리</span>
@@ -1054,76 +1088,118 @@ ${editorText.trim()}`;
           </div>
         </header>
 
-        <section className="platform-section">
-          <div className="card entry-card">
-            <div className="section-header">
-              <h2>내 학습 히스토리</h2>
-              <p>이름과 학생 ID를 입력하면 본 페이지로 이동합니다.</p>
-            </div>
-            <div className="entry-toggle">
-              <button
-                type="button"
-                className={entryMode === 'login' ? 'active' : ''}
-                onClick={() => setEntryMode('login')}
-              >
-                로그인
-              </button>
-              <button
-                type="button"
-                className={entryMode === 'signup' ? 'active' : ''}
-                onClick={() => setEntryMode('signup')}
-              >
-                신규 가입
-              </button>
-            </div>
-            <label htmlFor="entry-name">이름</label>
-            <input
-              id="entry-name"
-              type="text"
-              value={entryName}
-              onChange={(e) => setEntryName(e.target.value)}
-              placeholder="예: 홍길동"
-            />
-            {entryMode === 'login' ? (
-              <>
-                <label htmlFor="entry-id">학생 ID</label>
-                <input
-                  id="entry-id"
-                  type="text"
-                  value={entryId}
-                  onChange={(e) => setEntryId(e.target.value.toUpperCase())}
-                  placeholder="예: 42AB"
-                />
-              </>
-            ) : (
-              <>
+        <section className="platform-section entry-section">
+          <div className="entry-cards">
+            <div className="card entry-card">
+              <div className="section-header">
+                <h2>학생</h2>
+                <p>이름과 학생 ID로 로그인하거나 신규 가입하세요.</p>
+              </div>
+              {studentLoggedIn ? (
                 <button
                   type="button"
-                  onClick={handleEntryCreate}
-                  disabled={studentLoading}
+                  className="entry-continue-btn"
+                  onClick={() => setShowHomeScreen(false)}
                 >
-                  {studentLoading ? '발급 중...' : '학생 ID 발급받기'}
+                  학생으로 계속하기
                 </button>
-                {entryMessage && <p className="success-text">{entryMessage}</p>}
-              </>
-            )}
-            {studentError && <p className="error-text">{studentError}</p>}
-            {entryMode === 'login' && (
-              <button
-                type="button"
-                onClick={handleEnter}
-                disabled={studentLoading}
-              >
-                {studentLoading ? '확인 중...' : '내 학습 시작하기'}
-              </button>
-            )}
-            <button
-              type="button"
-              className="ghost-btn"
-              onClick={() => setShowFindModal(true)}
-            >
-              학생 ID 찾기
-            </button>
+              ) : (
+                <>
+                  <div className="entry-toggle">
+                    <button
+                      type="button"
+                      className={entryMode === 'login' ? 'active' : ''}
+                      onClick={() => setEntryMode('login')}
+                    >
+                      로그인
+                    </button>
+                    <button
+                      type="button"
+                      className={entryMode === 'signup' ? 'active' : ''}
+                      onClick={() => setEntryMode('signup')}
+                    >
+                      신규 가입
+                    </button>
+                  </div>
+                  <label htmlFor="entry-name">이름</label>
+                  <input
+                    id="entry-name"
+                    type="text"
+                    value={entryName}
+                    onChange={(e) => setEntryName(e.target.value)}
+                    placeholder="예: 홍길동"
+                  />
+                  {entryMode === 'login' ? (
+                    <>
+                      <label htmlFor="entry-id">학생 ID</label>
+                      <input
+                        id="entry-id"
+                        type="text"
+                        value={entryId}
+                        onChange={(e) => setEntryId(e.target.value.toUpperCase())}
+                        placeholder="예: 42AB"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleEntryCreate}
+                        disabled={studentLoading}
+                      >
+                        {studentLoading ? '발급 중...' : '학생 ID 발급받기'}
+                      </button>
+                      {entryMessage && <p className="success-text">{entryMessage}</p>}
+                    </>
+                  )}
+                  {studentError && <p className="error-text">{studentError}</p>}
+                  {entryMode === 'login' && (
+                    <button
+                      type="button"
+                      onClick={handleEnter}
+                      disabled={studentLoading}
+                    >
+                      {studentLoading ? '확인 중...' : '내 학습 시작하기'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    onClick={() => setShowFindModal(true)}
+                  >
+                    학생 ID 찾기
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="card entry-card">
+              <div className="section-header">
+                <h2>강사</h2>
+                <p>강사 화면으로 이동합니다.</p>
+              </div>
+              {isTeacherEntry ? (
+                <button
+                  type="button"
+                  className="entry-continue-btn"
+                  onClick={() => setShowHomeScreen(false)}
+                >
+                  강사로 계속하기
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="entry-primary-btn"
+                  onClick={() => {
+                    setIsTeacherEntry(true);
+                    setActiveView('teacher');
+                    setShowHomeScreen(false);
+                  }}
+                >
+                  강사로 들어가기
+                </button>
+              )}
+            </div>
           </div>
         </section>
         {showFindModal && (
@@ -1204,6 +1280,9 @@ ${editorText.trim()}`;
       <div className="home-button-wrapper">
         <button type="button" className="home-button" onClick={handleGoHome}>
           홈
+        </button>
+        <button type="button" className="logout-button" onClick={handleLogout}>
+          로그아웃
         </button>
       </div>
       <header className="platform-hero">
@@ -1392,7 +1471,7 @@ ${editorText.trim()}`;
                   rel="noopener noreferrer"
                   className="mobile-review-link"
                 >
-                  📱 이동 중·집에서 복습하기 (모바일에서 /review 접속 후 학생 ID 입력)
+                  📱 모바일 단어 복습
                 </a>
                 {vocabularyError && <p className="error-text">{vocabularyError}</p>}
                 {vocabularyLoading && <p className="empty-text">단어 불러오는 중...</p>}
