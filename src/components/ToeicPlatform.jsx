@@ -1005,8 +1005,8 @@ Create a personalized review plan based on the student's weaknesses.
 Weaknesses: ${weaknessText}
 Class notes: ${classNotes.trim() || '없음'}
 Output must be in Korean and include:
-1) 오늘 복습 루틴(15~20분) 2) 3일 반복 학습 플랜 3) 약점 보완용 미니 문제 5문항
-Keep it concise and actionable.`;
+1) 오늘 복습 루틴(15~20분) 2) 3일 반복 학습 플랜 3) 주의사항(매일 15~20분 투자, 꾸준히 학습 등)
+Do NOT include "약점 보완용 미니 문제" or quiz questions in the plan text. Keep it concise and actionable.`;
 
     try {
       const text = await generateText(prompt, {
@@ -1233,9 +1233,9 @@ ${historySummary}`;
       }
 
       const prompt = `You are a TOEIC writing coach.
-Give concise feedback in English on the student's business document writing.
-Include in English: 1) What they did well 2) What to improve 3) One TOEIC-style rewritten example sentence.
-Student's sentence:
+학습자의 비즈니스 문서 영작에 대해 한국어로 짧은 피드백을 주세요.
+다음 세 가지를 한국어로 포함하세요: 1) 잘한 점 2) 보완할 점 3) TOEIC 스타일로 다듬은 예시 문장 하나.
+학생 문장:
 ${editorText.trim()}`;
 
       const feedback = await generateText(prompt, {
@@ -2269,6 +2269,26 @@ ${editorText.trim()}`;
               <pre>{practiceOutput.replace(/\*\*/g, '')}</pre>
             </div>
           )}
+        </div>
+        <div className="card weakness-mini-card" style={{ marginTop: '1rem' }}>
+          <h3>약점 보완 미니 문제</h3>
+          <p className="weakness-mini-desc">약점에 맞는 미니 문제를 새 창에서 풀어보세요.</p>
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                sessionStorage.setItem(
+                  'miniQuizData',
+                  JSON.stringify({ studentId: studentId || '', quiz: miniQuiz })
+                );
+                window.open('/mini-quiz', '_blank', 'noopener,noreferrer');
+              } catch (e) {
+                console.error('Mini quiz open error:', e);
+              }
+            }}
+          >
+            미니 문제 풀기
+          </button>
         </div>
         {showWritingModal && (
           <div className="modal-overlay" onClick={() => setShowWritingModal(false)}>
