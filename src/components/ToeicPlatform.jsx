@@ -1889,13 +1889,13 @@ ${editorText.trim()}`;
                 {editorError && <p className="error-text">{editorError}</p>}
                 {editorSuccess && <p className="success-text">{editorSuccess}</p>}
                 {editorSubmission && (
-                  <div className="result-box">
+                  <div className="result-box result-box-duo">
                     <h3>제출 내용</h3>
                     <pre>{editorSubmission}</pre>
                   </div>
                 )}
                 {editorFeedback && (
-                  <div className="result-box">
+                  <div className="result-box result-box-duo">
                     <h3>AI 피드백</h3>
                     <pre>{editorFeedback}</pre>
                   </div>
@@ -2093,7 +2093,7 @@ ${editorText.trim()}`;
             </button>
             {dailyReviewError && <p className="error-text">{dailyReviewError}</p>}
             {dailyReviewOutput && (
-              <div className="result-box">
+              <div className="result-box result-box-duo">
                 <h3>오늘 학습 약점 & 복습</h3>
                 <pre>{dailyReviewOutput}</pre>
               </div>
@@ -2133,7 +2133,7 @@ ${editorText.trim()}`;
           )}
           {practiceError && <p className="error-text">{practiceError}</p>}
           {practiceOutput && (
-            <div className="result-box">
+            <div className="result-box result-box-duo">
               <h3>개인 맞춤 반복 학습 플랜</h3>
               <pre>{practiceOutput}</pre>
             </div>

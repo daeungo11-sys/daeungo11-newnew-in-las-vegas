@@ -1237,6 +1237,35 @@
   color: #0f172a;
 }
 
+/* 제출 내용 / AI 피드백 / 보완학습 결과: 듀오링고 스타일 카드 */
+.result-box-duo {
+  border: none;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-bottom: 4px solid var(--duo-green, #58cc02);
+  background: var(--summary-card-bg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.result-box-duo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.06), 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+.result-box-duo h3 {
+  font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+  font-weight: 800;
+  color: var(--summary-card-text);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--summary-card-border);
+}
+
+.result-box-duo pre {
+  color: var(--summary-card-text);
+  margin: 12px 0 0;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1379,6 +1408,19 @@
   color: var(--color-text);
   font-size: 13px;
   line-height: 1.6;
+}
+
+/* 다크모드: 보완학습 오늘 틀린 문제 카드 글자 검정으로 가독성 확보 */
+[data-theme='dark'] .review-card {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme='dark'] .review-card .review-header h3,
+[data-theme='dark'] .review-card .review-helper,
+[data-theme='dark'] .review-card .wrong-list,
+[data-theme='dark'] .review-card .wrong-list li {
+  color: #0f172a;
 }
 
 .weakness-grid {
