@@ -292,6 +292,48 @@ function ToeicPlatform() {
     ],
   };
 
+  const passagePhrases = {
+    Email: [
+      'Due to unforeseen circumstances, ...',
+      'We would like to inform you that ...',
+      'Please note that the schedule has been revised.',
+      'We appreciate your understanding and cooperation.',
+      'Please do not hesitate to contact us if you have any questions.',
+    ],
+    'News Article': [
+      'The company announced that ...',
+      'According to the press release, ...',
+      'This represents a significant increase compared to ...',
+      'The spokesperson stated that ...',
+      'Industry experts expect ...',
+    ],
+    Announcement: [
+      'This is to inform all staff that ...',
+      'Please be advised that the following changes will take effect ...',
+      'We would like to remind everyone that ...',
+      'Your cooperation in this matter is greatly appreciated.',
+      'For further information, please contact ...',
+    ],
+  };
+
+  const requiredPhrasesByType = {
+    Email: [
+      'Due to unforeseen circumstances',
+      'We would like to inform you that',
+      'Please note that the schedule has been revised',
+    ],
+    'News Article': [
+      'announced that',
+      'According to',
+      'stated that',
+    ],
+    Announcement: [
+      'inform all',
+      'Please be advised',
+      'remind everyone',
+    ],
+  };
+
   const weaknessText = useMemo(() => {
     if (selectedWeaknesses.length === 0) {
       return '없음';
@@ -332,13 +374,25 @@ function ToeicPlatform() {
     });
   }, [historyItems]);
   const todayWrongQuestions = useMemo(() => {
-    if (todayHistory.length === 0) {
-      return [];
+    if (todayHistory.length === 0) return [];
+    const dailyReview = todayHistory.find((item) => item.activityType === 'DAILY_REVIEW');
+    if (dailyReview?.inputText) {
+      const parts = dailyReview.inputText
+        .split(/\s*문제\s*\d+\s*:\s*/i)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (parts.length > 0) {
+        return parts.map((text, i) => `문제 ${i + 1}: ${text}`);
+      }
     }
-    return todayHistory.map(
-      (item, index) =>
-        `문제 ${index + 1}: ${item.inputText?.slice(0, 80) || '입력 없음'}`
-    );
+    return todayHistory
+      .filter((item) => item.activityType !== 'DAILY_REVIEW')
+      .map((item, index) => {
+        const text = item.inputText?.trim() || '입력 없음';
+        const label = item.activityType || '활동';
+        const preview = text.length > 100 ? `${text.slice(0, 100)}…` : text;
+        return `문제 ${index + 1}: [${label}] ${preview}`;
+      });
   }, [todayHistory]);
 
   const miniQuiz = useMemo(() => {
@@ -1114,11 +1168,7 @@ ${historySummary}`;
     ? Math.round((miniQuizScore.incorrect / totalQuiz) * 100)
     : 0;
 
-  const requiredPhrases = [
-    'Due to unforeseen circumstances',
-    'We would like to inform you that',
-    'Please note that the schedule has been revised',
-  ];
+  const requiredPhrases = requiredPhrasesByType[passageType] ?? requiredPhrasesByType.Email;
 
   const editorLength = editorText.trim().length;
   const requiredUsed = requiredPhrases.filter((phrase) =>
@@ -1192,6 +1242,12 @@ ${editorText.trim()}`;
     (studentName.trim() && studentId.trim()) || isTeacherEntry
   );
   const showEntryScreen = !hasAccess || showHomeScreen;
+
+  useEffect(() => {
+    if (!hasAccess) return;
+    if (isTeacherEntry) setActiveView('teacher');
+    else setActiveView('student');
+  }, [hasAccess, isTeacherEntry]);
 
   if (showEntryScreen) {
     const studentLoggedIn = Boolean(studentName.trim() && studentId.trim());
@@ -1483,22 +1539,25 @@ ${editorText.trim()}`;
         </div>
       )}
 
-      <div className="view-toggle">
-        <button
-          type="button"
-          className={activeView === 'teacher' ? 'active' : ''}
-          onClick={() => setActiveView('teacher')}
-        >
-          강사
-        </button>
-        <button
-          type="button"
-          className={activeView === 'student' ? 'active' : ''}
-          onClick={() => setActiveView('student')}
-        >
-          학생
-        </button>
-      </div>
+      {/* 로그인 후에는 강사/학생 전환 불가: 역할별로 해당 화면만 표시 */}
+      {!hasAccess ? (
+        <div className="view-toggle">
+          <button
+            type="button"
+            className={activeView === 'teacher' ? 'active' : ''}
+            onClick={() => setActiveView('teacher')}
+          >
+            강사
+          </button>
+          <button
+            type="button"
+            className={activeView === 'student' ? 'active' : ''}
+            onClick={() => setActiveView('student')}
+          >
+            학생
+          </button>
+        </div>
+      ) : null}
 
       {activeSection === 'today' && (
         <section id="section-today" className="platform-section">
@@ -1887,13 +1946,12 @@ ${editorText.trim()}`;
             <div className="card phrase-card">
               <div className="phrase-header">
                 <h3>핵심 토익 구문</h3>
-                <p>작성 전 반드시 참고할 표현</p>
+                <p>작성 전 반드시 참고할 표현 ({passageType})</p>
               </div>
               <ul className="phrase-list">
-                <li>Due to unforeseen circumstances, ...</li>
-                <li>We would like to inform you that ...</li>
-                <li>Please note that the schedule has been revised.</li>
-                <li>We appreciate your understanding and cooperation.</li>
+                {(passagePhrases[passageType] ?? passagePhrases.Email).map((phrase, index) => (
+                  <li key={index}>{phrase}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -2114,7 +2172,9 @@ ${editorText.trim()}`;
             </div>
             <ul className="wrong-list">
               {todayWrongQuestions.length > 0 ? (
-                todayWrongQuestions.map((item) => <li key={item}>{item}</li>)
+                todayWrongQuestions.map((item, index) => (
+                  <li key={`wrong-${index}`}>{item}</li>
+                ))
               ) : (
                 <li>오늘 학습 기록이 없습니다.</li>
               )}
@@ -2173,6 +2233,25 @@ ${editorText.trim()}`;
               <pre>{practiceOutput.replace(/\*\*/g, '')}</pre>
             </div>
           )}
+          <button
+            type="button"
+            className="ghost-btn"
+            disabled={!practiceOutput}
+            onClick={() => {
+              try {
+                sessionStorage.setItem(
+                  'miniQuizData',
+                  JSON.stringify({ quiz: miniQuiz, studentId: studentId || null })
+                );
+                const url = `${window.location.origin}${window.location.pathname.replace(/\/?$/, '')}/mini-quiz`;
+                window.open(url, 'miniQuiz', 'width=620,height=720,scrollbars=yes,resizable=yes');
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+          >
+            약점 보완 미니 문제 풀기
+          </button>
         </div>
       </section>
       )}

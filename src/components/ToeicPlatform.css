@@ -1435,19 +1435,34 @@
 .review-header h3 {
   margin: 0;
   font-size: 16px;
+  font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+  font-weight: 800;
 }
 
 .review-helper {
   font-size: 12px;
   color: var(--color-muted);
+  font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+  font-weight: 600;
 }
 
 .wrong-list {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 20px;
   color: var(--color-text);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.65;
+  font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+  word-break: break-word;
+}
+
+.wrong-list li {
+  margin-bottom: 10px;
+  padding-right: 8px;
+}
+
+.wrong-list li:last-child {
+  margin-bottom: 0;
 }
 
 /* 다크모드: 보완학습 오늘 틀린 문제 카드 글자 검정으로 가독성 확보 */
