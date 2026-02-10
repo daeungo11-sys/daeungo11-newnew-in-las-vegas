@@ -1317,6 +1317,20 @@
   flex-wrap: wrap;
 }
 
+.student-history-logged {
+  align-items: center;
+}
+
+.student-id-display {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.student-id-display strong {
+  font-size: 15px;
+  color: var(--color-indigo);
+}
+
 .student-field {
   display: flex;
   flex-direction: column;

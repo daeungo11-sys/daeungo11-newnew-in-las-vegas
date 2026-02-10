@@ -1676,45 +1676,20 @@ ${editorText.trim()}`;
               </p>
             </div>
             <div className="card">
-              <div className="student-row">
-                <div className="student-field">
-                  <label htmlFor="student-name">학생 이름</label>
-                  <input
-                    id="student-name"
-                    type="text"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="예: 홍길동"
-                  />
+              {studentId && String(studentId).trim() ? (
+                <div className="student-row student-history-logged">
+                  <span className="student-id-display">학생 ID: <strong>{String(studentId).trim()}</strong></span>
+                  <button
+                    type="button"
+                    onClick={handleLoadHistory}
+                    disabled={historyLoading}
+                  >
+                    {historyLoading ? '불러오는 중...' : '최근 히스토리 조회'}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleCreateStudent}
-                  disabled={studentLoading}
-                >
-                  {studentLoading ? '생성 중...' : '학생 ID 생성'}
-                </button>
-              </div>
-              <div className="student-row">
-                <div className="student-field">
-                  <label htmlFor="student-id">학생 ID</label>
-                  <input
-                    id="student-id"
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="생성된 ID 또는 기존 ID 입력"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLoadHistory}
-                  disabled={historyLoading}
-                >
-                  {historyLoading ? '불러오는 중...' : '최근 히스토리 조회'}
-                </button>
-              </div>
-              {studentError && <p className="error-text">{studentError}</p>}
+              ) : (
+                <p className="empty-text">홈에서 이름과 학생 ID로 로그인하면 여기에 ID가 표시되고, 최근 히스토리 조회 버튼을 사용할 수 있어요.</p>
+              )}
               {historyError && <p className="error-text">{historyError}</p>}
               {historyItems.length > 0 && (
                 <div className="recent-history">
