@@ -13,6 +13,7 @@ import {
   fetchVocabulary,
   addVocabulary,
   deleteVocabulary,
+  fetchClassSummary,
 } from '../services/apiClient';
 import {
   PieChart,
@@ -162,6 +163,9 @@ function ToeicPlatform() {
   const [practiceOutput, setPracticeOutput] = useState('');
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState('');
+  const [classSummary, setClassSummary] = useState(null);
+  const [classSummaryLoading, setClassSummaryLoading] = useState(false);
+  const [classSummaryError, setClassSummaryError] = useState('');
   const [dailyReviewOutput, setDailyReviewOutput] = useState('');
   const [dailyReviewLoading, setDailyReviewLoading] = useState(false);
   const [dailyReviewError, setDailyReviewError] = useState('');
@@ -598,6 +602,19 @@ function ToeicPlatform() {
       })
       .finally(() => setVocabularyLoading(false));
   }, [activeSection, studentId]);
+
+  useEffect(() => {
+    if (activeView !== 'teacher' || activeSection !== 'history') return;
+    setClassSummaryLoading(true);
+    setClassSummaryError('');
+    fetchClassSummary()
+      .then((data) => setClassSummary(data))
+      .catch((err) => {
+        setClassSummaryError(getFriendlyError(err, '학급 요약을 불러오지 못했어요.'));
+        setClassSummary(null);
+      })
+      .finally(() => setClassSummaryLoading(false));
+  }, [activeView, activeSection]);
 
   const handleAddVocabulary = async () => {
     const word = vocabWord.trim();
@@ -1056,19 +1073,35 @@ ${historySummary}`;
     .filter((part) => part.highlight)
     .map((part) => part.tooltip);
 
-  const summaryCards = [
-    { label: '제출률', value: '0%', helper: '지난 7일 기준' },
-    { label: '평균 점수', value: '0점', helper: '문법+어휘+적합도 평균' },
-    { label: '최다 오류', value: '없음', helper: '오류 0건' },
-    { label: '활동 학생', value: '0명', helper: '오늘 참여' },
-  ];
+  const summaryCards = useMemo(() => {
+    if (!classSummary) {
+      return [
+        { label: '제출률', value: '0%', helper: '지난 7일 기준' },
+        { label: '평균 점수', value: '0점', helper: '문법+어휘+적합도 평균' },
+        { label: '최다 오류', value: '없음', helper: '오류 0건' },
+        { label: '활동 학생', value: '0명', helper: '오늘 참여' },
+      ];
+    }
+    const avg = classSummary.averageScore != null ? `${classSummary.averageScore}점` : '0점';
+    return [
+      { label: '제출률', value: `${classSummary.submissionRate}%`, helper: '지난 7일 기준' },
+      { label: '평균 점수', value: avg, helper: '문법+어휘+적합도 평균' },
+      { label: '최다 오류', value: classSummary.topError || '없음', helper: '오류 유형' },
+      { label: '활동 학생', value: `${classSummary.activeStudentsToday}명`, helper: '오늘 참여' },
+    ];
+  }, [classSummary]);
 
-  const errorDistribution = [
-    { name: '시제/수일치', value: 0 },
-    { name: '전치사', value: 0 },
-    { name: '동의어', value: 0 },
-    { name: '관계사', value: 0 },
-  ];
+  const errorDistribution = useMemo(() => {
+    if (!classSummary?.errorDistribution?.length) {
+      return [
+        { name: '시제/수일치', value: 0 },
+        { name: '전치사', value: 0 },
+        { name: '동의어', value: 0 },
+        { name: '관계사', value: 0 },
+      ];
+    }
+    return classSummary.errorDistribution;
+  }, [classSummary]);
 
   const errorColors = ['#4f46e5', '#7c83f1', '#7dd3a6', '#c7d2fe'];
 
@@ -1631,6 +1664,8 @@ ${editorText.trim()}`;
               <h2>학급 요약 대시보드</h2>
               <p>제출률과 평균 점수, 주요 오류를 한눈에 확인하세요.</p>
             </div>
+            {classSummaryError && <p className="error-text">{classSummaryError}</p>}
+            {classSummaryLoading && <p className="info-text">학급 요약 불러오는 중...</p>}
             <div className="summary-grid">
               {summaryCards.map((card) => (
                 <div key={card.label} className="summary-card">
@@ -2135,69 +2170,10 @@ ${editorText.trim()}`;
           {practiceOutput && (
             <div className="result-box result-box-duo">
               <h3>개인 맞춤 반복 학습 플랜</h3>
-              <pre>{practiceOutput}</pre>
+              <pre>{practiceOutput.replace(/\*\*/g, '')}</pre>
             </div>
           )}
-          <button
-            type="button"
-            className="ghost-btn"
-            onClick={() => {
-              setMiniQuizAnswers(['', '', '']);
-              setMiniQuizChecked(false);
-              setShowMiniQuiz(true);
-            }}
-            disabled={!practiceOutput}
-          >
-            약점 보완 미니 문제 풀기
-          </button>
         </div>
-        {showMiniQuiz && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <div className="modal-header">
-                <h3>약점 보완 미니 문제</h3>
-                <button
-                  type="button"
-                  className="modal-close"
-                  onClick={() => setShowMiniQuiz(false)}
-                >
-                  닫기
-                </button>
-              </div>
-              <div className="modal-body">
-                {miniQuiz.map((item, index) => (
-                  <div key={item.question} className="quiz-item">
-                    <p className="quiz-question">{item.question}</p>
-                    <input
-                      type="text"
-                      value={miniQuizAnswers[index] || ''}
-                      onChange={(event) => {
-                        const next = [...miniQuizAnswers];
-                        next[index] = event.target.value;
-                        setMiniQuizAnswers(next);
-                      }}
-                      placeholder="정답을 입력하세요"
-                    />
-                    {miniQuizChecked && (
-                      <p className="quiz-feedback">
-                        정답: {item.answer}
-                      </p>
-                    )}
-                  </div>
-                ))}
-                <button type="button" onClick={handleMiniQuizCheck}>
-                  채점하기
-                </button>
-                {miniQuizChecked && (
-                  <p className="quiz-score">
-                    정답 {miniQuizScore.correct}개 / 오답{' '}
-                    {miniQuizScore.incorrect}개
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </section>
       )}
     </div>

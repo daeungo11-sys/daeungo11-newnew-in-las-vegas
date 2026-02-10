@@ -85,3 +85,11 @@ export function deleteVocabulary(studentId, id) {
     body: JSON.stringify({ studentId, id }),
   });
 }
+
+/**
+ * 학급 요약 대시보드 (제출률, 평균 점수, 최다 오류, 활동 학생 수, 오류 유형별 분포)
+ * @returns {Promise<{ submissionRate, averageScore, topError, activeStudentsToday, errorDistribution }>}
+ */
+export function fetchClassSummary() {
+  return request('/get-class-summary');
+}

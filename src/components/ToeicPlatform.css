@@ -517,10 +517,35 @@
   color: var(--color-text);
 }
 
-[data-theme='dark'] .result-box,
-[data-theme='dark'] .modal-card {
+[data-theme='dark'] .result-box {
   background: #111827;
   border-color: #1f2937;
+}
+
+/* 다크모드: 모달(약점 보완 미니 문제 등) 밝은 배경 + 검정 글씨로 가독성 확보 */
+[data-theme='dark'] .modal-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='dark'] .modal-card .modal-header h3,
+[data-theme='dark'] .modal-card .modal-body,
+[data-theme='dark'] .modal-card .quiz-question,
+[data-theme='dark'] .modal-card .quiz-feedback,
+[data-theme='dark'] .modal-card .quiz-score,
+[data-theme='dark'] .modal-card .quiz-item {
+  color: #0f172a;
+}
+
+[data-theme='dark'] .modal-card .quiz-item {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme='dark'] .modal-card .modal-close {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
 /* 다크모드: 제출 내용 / AI 피드백 흰색 글씨로 표시 */
@@ -927,6 +952,15 @@
   background: var(--color-green-soft);
   color: #166534;
   border-color: #bfe9cf;
+}
+
+/* 다크모드: 학습 지문 요약 '상황 요약' 배지 네온 그린으로 가독성 확보 */
+[data-theme='dark'] .badge.soft {
+  background: rgba(0, 255, 136, 0.12);
+  color: #00ff88;
+  border-color: #00ff88;
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.6), 0 0 24px rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.2);
 }
 
 .phrase-card {
