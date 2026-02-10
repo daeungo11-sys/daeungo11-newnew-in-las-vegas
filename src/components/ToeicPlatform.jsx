@@ -134,6 +134,8 @@ function ToeicPlatform() {
   const [converterLoading, setConverterLoading] = useState(false);
   const [converterError, setConverterError] = useState('');
   const [converterNotice, setConverterNotice] = useState('');
+  /** 강사: 교재 변환 시 "오늘 수업에서 이 3가지는 꼭 설명하세요" 카드에 표시할 내용 */
+  const [teacherReportFromConverter, setTeacherReportFromConverter] = useState('');
   const [passageType, setPassageType] = useState('Email');
   const [passageSummary, setPassageSummary] = useState(
     '상황 요약: 회의 일정 변경 안내'
@@ -454,6 +456,16 @@ function ToeicPlatform() {
     : [...studentSectionRow1, ...studentSectionRow2]
   );
 
+  /** 교재 변환 결과를 "3가지" 항목으로 파싱 (1) 2) 3) 또는 번호. 구분) */
+  const teacherReportThreePoints = useMemo(() => {
+    if (!teacherReportFromConverter || !teacherReportFromConverter.trim()) return [];
+    const parts = teacherReportFromConverter
+      .split(/\n\s*\d+[.)]\s*/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parts.slice(0, 3);
+  }, [teacherReportFromConverter]);
+
   const handleSectionNav = (id) => {
     setActiveSection(id);
     requestAnimationFrame(() => {
@@ -635,7 +647,9 @@ ${input}`;
         temperature: 0.4,
         max_tokens: 900,
       });
-      setConverterOutput(text.trim());
+      const trimmed = text.trim();
+      setConverterOutput(trimmed);
+      setTeacherReportFromConverter(trimmed);
     } catch (error) {
       console.error('Converter Error:', error);
       setConverterError(
@@ -1072,7 +1086,7 @@ ${editorText.trim()}`;
         </div>
         <header className="platform-hero entry-hero">
           <div className="hero-content">
-            <h1>TOEIC Paraphrasing & Review Platform</h1>
+            <h1>VIA: 일상 속 영어 통로</h1>
             <p>학생은 로그인, 강사는 강사 창에서 시작하세요.</p>
           </div>
           <div className="hero-badges">
@@ -1281,7 +1295,7 @@ ${editorText.trim()}`;
       </div>
       <header className="platform-hero">
         <div className="hero-content">
-          <h1>TOEIC Paraphrasing & Review Platform</h1>
+          <h1>VIA: 일상 속 영어 통로</h1>
           <p>
             학생이 작성한 문장을 토익 빈출 표현으로 바꿔주고, 수업 후 반복 학습과
             개인별 약점 보완까지 이어지는 학습 플랫폼입니다.
@@ -1585,11 +1599,15 @@ ${editorText.trim()}`;
               </div>
               <div className="card report-card">
                 <h3>오늘 수업에서 이 3가지는 꼭 설명하세요!</h3>
-                <ol>
-                  <li>시제/수일치 오류: 과거완료 vs 과거시제 구분</li>
-                  <li>전치사 선택: in/on/at의 시간 표현 규칙</li>
-                  <li>동의어 선택: inform/notify/advise 차이</li>
-                </ol>
+                {teacherReportFromConverter ? (
+                  <pre className="report-converter-content">{teacherReportFromConverter}</pre>
+                ) : (
+                  <ol>
+                    <li>시제/수일치 오류: 과거완료 vs 과거시제 구분</li>
+                    <li>전치사 선택: in/on/at의 시간 표현 규칙</li>
+                    <li>동의어 선택: inform/notify/advise 차이</li>
+                  </ol>
+                )}
               </div>
             </div>
           </section>
