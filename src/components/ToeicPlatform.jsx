@@ -47,6 +47,80 @@ function formatHistoryOutput(text) {
   return s;
 }
 
+/** 오늘 배운 내용: PRACTICE_PLAN, SUMMARY_WRITING 가독성 있게 세련되게 렌더 */
+function FormattedTodayContent({ text, activityType }) {
+  const raw = formatHistoryOutput(text);
+  const isFormatted = ['PRACTICE_PLAN', 'SUMMARY_WRITING'].includes(activityType) && raw;
+  if (!raw) return null;
+  if (!isFormatted) return <pre className="today-learned-pre">{raw}</pre>;
+
+  const lines = raw.split(/\n/).map((l) => l.trimEnd());
+  const nodes = [];
+  let listItems = [];
+  let key = 0;
+  const flushList = () => {
+    if (listItems.length) {
+      nodes.push(
+        <ol key={key++} className="today-formatted-list">
+          {listItems.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ol>
+      );
+      listItems = [];
+    }
+  };
+  const renderInline = (str) => {
+    const parts = [];
+    let s = str;
+    while (s.length) {
+      const boldStart = s.indexOf('**');
+      if (boldStart === -1) {
+        parts.push(s);
+        break;
+      }
+      const boldEnd = s.indexOf('**', boldStart + 2);
+      if (boldEnd === -1) {
+        parts.push(s);
+        break;
+      }
+      if (boldStart > 0) parts.push(s.slice(0, boldStart));
+      parts.push(<strong key={`b-${key++}`}>{s.slice(boldStart + 2, boldEnd)}</strong>);
+      s = s.slice(boldEnd + 2);
+    }
+    return parts;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) {
+      flushList();
+      continue;
+    }
+    const numMatch = line.match(/^(\d+)\.\s+(.+)$/);
+    if (numMatch) {
+      listItems.push(renderInline(numMatch[2]));
+      continue;
+    }
+    flushList();
+    if (/^\*\*.+\*\*$/.test(line)) {
+      nodes.push(
+        <h4 key={key++} className="today-formatted-heading">
+          {line.slice(2, -2)}
+        </h4>
+      );
+    } else {
+      nodes.push(
+        <p key={key++} className="today-formatted-para">
+          {renderInline(line)}
+        </p>
+      );
+    }
+  }
+  flushList();
+  return <div className="today-formatted-block">{nodes}</div>;
+}
+
 const WEAKNESS_OPTIONS = [
   '문법: 시제/수일치',
   '문법: 가정법/조동사',
@@ -1416,7 +1490,7 @@ ${editorText.trim()}`;
                       <p className="today-learned-input">{item.inputText?.slice(0, 200)}{(item.inputText?.length || 0) > 200 ? '...' : ''}</p>
                       <details className="today-learned-details">
                         <summary>자세히 보기</summary>
-                        <pre>{formatHistoryOutput(item.outputText)}</pre>
+                        <FormattedTodayContent text={item.outputText} activityType={item.activityType} />
                       </details>
                     </li>
                   ))}

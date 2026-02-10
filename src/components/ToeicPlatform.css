@@ -389,7 +389,8 @@
   font-weight: 600;
 }
 
-.today-learned-details pre {
+.today-learned-details pre,
+.today-learned-pre {
   margin-top: 8px;
   padding: 12px;
   background: var(--summary-card-pre-bg);
@@ -398,6 +399,49 @@
   overflow-x: auto;
   font-size: 0.85rem;
   white-space: pre-wrap;
+}
+
+/* PRACTICE_PLAN, SUMMARY_WRITING 가독성 정리본 */
+.today-formatted-block {
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--summary-card-pre-bg);
+  border-radius: 10px;
+  color: var(--summary-card-text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.today-formatted-block .today-formatted-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-indigo);
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--summary-card-border);
+}
+
+.today-formatted-block .today-formatted-heading:not(:first-child) {
+  margin-top: 16px;
+}
+
+.today-formatted-block .today-formatted-para {
+  margin: 0 0 8px;
+  color: var(--summary-card-text);
+}
+
+.today-formatted-block .today-formatted-para strong {
+  color: var(--color-indigo);
+  font-weight: 700;
+}
+
+.today-formatted-block .today-formatted-list {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+}
+
+.today-formatted-block .today-formatted-list li {
+  margin-bottom: 6px;
 }
 
 [data-theme='dark'] .toeic-platform {
