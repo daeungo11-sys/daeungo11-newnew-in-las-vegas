@@ -316,6 +316,17 @@ function ToeicPlatform() {
       ),
     [historyItems, todayKey]
   );
+  /** 최근 학습 히스토리 표시용: SUMMARY_WRITING 아래 중복 PRACTICE_PLAN 하나 제거 */
+  const displayHistoryItems = useMemo(() => {
+    let practicePlanShown = false;
+    return historyItems.filter((item) => {
+      if (item.activityType === 'PRACTICE_PLAN') {
+        if (practicePlanShown) return false;
+        practicePlanShown = true;
+      }
+      return true;
+    });
+  }, [historyItems]);
   const todayWrongQuestions = useMemo(() => {
     if (todayHistory.length === 0) {
       return [];
@@ -1716,7 +1727,7 @@ ${editorText.trim()}`;
                 <div className="recent-history">
                   <h3 className="recent-history-title">최근 학습 히스토리</h3>
                   <ul className="recent-history-items">
-                    {historyItems.map((item) => (
+                    {displayHistoryItems.map((item) => (
                       <li key={item.id} className="recent-history-item">
                         <div className="recent-history-head">
                           <span className="recent-history-type">{item.activityType}</span>
@@ -1725,7 +1736,7 @@ ${editorText.trim()}`;
                         <p className="recent-history-body">{item.inputText}</p>
                         <details className="recent-history-result">
                           <summary>결과 보기</summary>
-                          <pre>{formatHistoryOutput(item.outputText)}</pre>
+                          <FormattedTodayContent text={item.outputText} activityType={item.activityType} />
                         </details>
                       </li>
                     ))}
@@ -1787,7 +1798,7 @@ ${editorText.trim()}`;
                 <div className="recent-history">
                   <h3 className="recent-history-title">최근 학습 히스토리</h3>
                   <ul className="recent-history-items">
-                    {historyItems.map((item) => (
+                    {displayHistoryItems.map((item) => (
                       <li key={item.id} className="recent-history-item">
                         <div className="recent-history-head">
                           <span className="recent-history-type">{item.activityType}</span>
@@ -1796,7 +1807,7 @@ ${editorText.trim()}`;
                         <p className="recent-history-body">{item.inputText}</p>
                         <details className="recent-history-result">
                           <summary>결과 보기</summary>
-                          <pre>{formatHistoryOutput(item.outputText)}</pre>
+                          <FormattedTodayContent text={item.outputText} activityType={item.activityType} />
                         </details>
                       </li>
                     ))}
