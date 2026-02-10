@@ -13,10 +13,11 @@ export default function MiniQuizPage() {
 
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         setData(parsed);
+        localStorage.removeItem(STORAGE_KEY);
       }
     } catch (_) {
       setData(null);

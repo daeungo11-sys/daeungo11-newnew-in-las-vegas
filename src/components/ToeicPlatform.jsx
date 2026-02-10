@@ -2277,11 +2277,13 @@ ${editorText.trim()}`;
             type="button"
             onClick={() => {
               try {
-                sessionStorage.setItem(
+                const base = window.location.pathname.replace(/\/$/, '') || '';
+                const quizPath = base ? `${base}/mini-quiz` : '/mini-quiz';
+                localStorage.setItem(
                   'miniQuizData',
                   JSON.stringify({ studentId: studentId || '', quiz: miniQuiz })
                 );
-                window.open('/mini-quiz', '_blank', 'noopener,noreferrer');
+                window.open(quizPath, '_blank', 'noopener,noreferrer');
               } catch (e) {
                 console.error('Mini quiz open error:', e);
               }
