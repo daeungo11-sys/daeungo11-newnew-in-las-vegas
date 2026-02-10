@@ -1,10 +1,1 @@
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "rewrites": [
-    { "source": "/review", "destination": "/index.html" }
-  ]
-}
+{"buildCommand":"npm run build","outputDirectory":"dist","devCommand":"npm run dev","installCommand":"npm install","framework":"vite","rewrites":[{"source":"/review","destination":"/index.html"},{"source":"/mini-quiz","destination":"/index.html"}]}

@@ -173,6 +173,7 @@ function ToeicPlatform() {
   const [miniQuizAnswers, setMiniQuizAnswers] = useState(['', '', '']);
   const [miniQuizChecked, setMiniQuizChecked] = useState(false);
   const [miniQuizScore, setMiniQuizScore] = useState({ correct: 0, incorrect: 0 });
+  const [showWritingModal, setShowWritingModal] = useState(false);
 
   const [historyItems, setHistoryItems] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -373,6 +374,8 @@ function ToeicPlatform() {
       return true;
     });
   }, [historyItems]);
+  /** 오늘 틀린 문제: DAILY_REVIEW 저장 시 "문제 1: ... 문제 2: ... 문제 3: ..." 형태로 저장되므로,
+   *  정규식 \s*문제\s*\d+\s*:\s* 로 잘라서 항목별(문제 1, 문제 2, 문제 3)로 구분해 표시 */
   const todayWrongQuestions = useMemo(() => {
     if (todayHistory.length === 0) return [];
     const dailyReview = todayHistory.find((item) => item.activityType === 'DAILY_REVIEW');
@@ -392,6 +395,18 @@ function ToeicPlatform() {
         const label = item.activityType || '활동';
         const preview = text.length > 100 ? `${text.slice(0, 100)}…` : text;
         return `문제 ${index + 1}: [${label}] ${preview}`;
+      });
+  }, [todayHistory]);
+
+  /** 오늘 기록 중 영작(SUMMARY_WRITING) 제출 내용만 추출 — 영작한 문장 확인용 */
+  const todayWritingItems = useMemo(() => {
+    return todayHistory
+      .filter((item) => item.activityType === 'SUMMARY_WRITING' && item.outputText)
+      .map((item) => {
+        const raw = item.outputText;
+        const match = raw.match(/제출\s*내용\s*:\s*\n?([\s\S]*?)(?=\n\nAI\s*피드백|$)/i);
+        const submission = match ? match[1].trim() : raw.slice(0, 300);
+        return { id: item.id, text: submission, createdAt: item.createdAt };
       });
   }, [todayHistory]);
 
@@ -2179,6 +2194,23 @@ ${editorText.trim()}`;
                 <li>오늘 학습 기록이 없습니다.</li>
               )}
             </ul>
+            <div className="writing-check-row">
+              <span className="writing-check-label">영작한 문장:</span>
+              {todayWritingItems.length > 0 ? (
+                <>
+                  <span className="writing-check-badge">있음</span>
+                  <button
+                    type="button"
+                    className="writing-check-btn"
+                    onClick={() => setShowWritingModal(true)}
+                  >
+                    확인
+                  </button>
+                </>
+              ) : (
+                <span className="writing-check-badge empty">없음</span>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleDailyReview}
@@ -2253,6 +2285,30 @@ ${editorText.trim()}`;
             약점 보완 미니 문제 풀기
           </button>
         </div>
+        {showWritingModal && (
+          <div className="modal-overlay" onClick={() => setShowWritingModal(false)}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>오늘 영작한 문장</h3>
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={() => setShowWritingModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+              <div className="modal-body">
+                {todayWritingItems.map((item, index) => (
+                  <div key={item.id || index} className="writing-modal-item">
+                    <strong>영작 {index + 1}</strong>
+                    <pre className="writing-modal-text">{item.text}</pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
       )}
     </div>

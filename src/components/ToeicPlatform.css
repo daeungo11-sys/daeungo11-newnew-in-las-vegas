@@ -1465,6 +1465,73 @@
   margin-bottom: 0;
 }
 
+.writing-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.writing-check-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--summary-card-text-muted);
+  font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+}
+
+.writing-check-badge {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-green-soft);
+  color: var(--color-green);
+}
+
+.writing-check-badge.empty {
+  background: var(--color-border);
+  color: var(--color-muted);
+}
+
+.writing-check-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-indigo);
+  background: var(--color-indigo-soft);
+  color: var(--color-indigo);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.writing-check-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.writing-modal-item {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--summary-card-pre-bg);
+  border: 1px solid var(--summary-card-border);
+  margin-bottom: 10px;
+}
+
+.writing-modal-item:last-child {
+  margin-bottom: 0;
+}
+
+.writing-modal-text {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--summary-card-text);
+}
+
 /* 다크모드: 보완학습 오늘 틀린 문제 카드 글자 검정으로 가독성 확보 */
 [data-theme='dark'] .review-card {
   background: #f1f5f9;
