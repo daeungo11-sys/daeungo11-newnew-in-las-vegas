@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
 :root {
   --color-bg: #ffffff;
@@ -10,6 +10,7 @@
   --color-indigo-soft: #eef2ff;
   --color-green-soft: #e6f7ee;
   --color-green: #22c55e;
+  --duo-green: #58cc02;
   /* 대시보드·오늘 배운 내용 카드 (라이트) */
   --summary-card-bg: #ffffff;
   --summary-card-text: #0f172a;
@@ -28,6 +29,7 @@
   --color-indigo-soft: #1f2a44;
   --color-green-soft: #123824;
   --color-green: #34d399;
+  --duo-green: #7ae84d;
   /* 대시보드·오늘 배운 내용 카드 (다크: 어두운 배경 + 밝은 글자) */
   --summary-card-bg: #1e1e1e;
   --summary-card-text: #f5f5f5;
@@ -44,7 +46,7 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Inter', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+  font-family: 'Nunito', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
 }
 
 html {
@@ -56,4 +58,10 @@ input,
 textarea,
 select {
   font-family: inherit;
+}
+
+/* 버튼 눌렀을 때 들어가는 듯한 효과 (전역) */
+button:active:not(:disabled) {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
