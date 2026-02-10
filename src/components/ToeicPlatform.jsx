@@ -445,20 +445,14 @@ function ToeicPlatform() {
     'ranking',
     'converter',
   ];
-  const studentSectionOrder = [
-    'today',
-    'history',
-    'summary',
-    'paraphrase',
-    'compare',
-    'review',
-    'ranking',
-    'vocabulary',
-  ];
+  const studentSectionRow1 = ['today', 'history', 'summary'].map((id) => sectionNavById[id]);
+  const studentSectionRow2 = ['paraphrase', 'compare', 'review', 'ranking', 'vocabulary'].map(
+    (id) => sectionNavById[id]
+  );
   const visibleSectionNav = (activeView === 'teacher'
-    ? teacherSectionOrder
-    : studentSectionOrder
-  ).map((id) => sectionNavById[id]);
+    ? teacherSectionOrder.map((id) => sectionNavById[id])
+    : [...studentSectionRow1, ...studentSectionRow2]
+  );
 
   const handleSectionNav = (id) => {
     setActiveSection(id);
@@ -1315,18 +1309,47 @@ ${editorText.trim()}`;
         )}
       </header>
 
-      <div className="section-nav">
-        {visibleSectionNav.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={activeSection === item.id ? 'active' : ''}
-            onClick={() => handleSectionNav(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {activeView === 'student' ? (
+        <div className="section-nav-two-rows">
+          <div className="section-nav">
+            {studentSectionRow1.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeSection === item.id ? 'active' : ''}
+                onClick={() => handleSectionNav(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <div className="section-nav">
+            {studentSectionRow2.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeSection === item.id ? 'active' : ''}
+                onClick={() => handleSectionNav(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="section-nav">
+          {visibleSectionNav.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={activeSection === item.id ? 'active' : ''}
+              onClick={() => handleSectionNav(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="view-toggle">
         <button

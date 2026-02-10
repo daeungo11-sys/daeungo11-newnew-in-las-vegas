@@ -609,6 +609,18 @@
   box-shadow: 0 14px 30px rgba(79, 70, 229, 0.28);
 }
 
+.section-nav-two-rows {
+  max-width: 960px;
+  margin: 0 auto 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-nav-two-rows .section-nav {
+  margin: 0 auto;
+}
+
 .section-nav {
   max-width: 960px;
   margin: 0 auto 24px;
