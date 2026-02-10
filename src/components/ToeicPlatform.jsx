@@ -188,6 +188,10 @@ function ToeicPlatform() {
   const [editorSubmission, setEditorSubmission] = useState('');
 
   const [compareInput, setCompareInput] = useState('');
+  const [compareRecommendation, setCompareRecommendation] = useState('');
+  const [compareReasons, setCompareReasons] = useState([]);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState('');
 
   const [activeTooltip, setActiveTooltip] = useState('');
   const [activeSection, setActiveSection] = useState('history');
@@ -891,11 +895,16 @@ ${input}`;
     setParaphraseNotice('');
 
     const prompt = `You are a TOEIC paraphrasing coach.
-Given the student's sentence, rewrite it using common TOEIC-style expressions.
-Return 3 paraphrase alternatives in English, each as a bullet point, and add a short Korean note about the key expression used.
-Then add a Korean "오답 피드백" that explains what was weak in the student's sentence for today's lesson.
-Today's lesson type: ${passageType}
-Sentence: "${paraphraseInput.trim()}"`;
+학생 문장을 토익 빈출 표현으로 바꾼 대체 문장 3개를 제안해 주세요.
+
+규칙:
+- 대체 문장은 영어로만 작성하고, 나머지 설명은 반드시 한국어로 보기 쉽게 작성하세요.
+- 각 대체 문장 아래에 "핵심 표현"을 한국어로 한 줄 설명하세요.
+- 마지막에 "오답 피드백"을 한국어로 작성해, 원문에서 어떤 점이 아쉬운지 설명하세요.
+- 출력 시 ** 같은 마크다운 기호는 사용하지 마세요. 일반 텍스트만 사용하세요.
+
+오늘 수업 유형: ${passageType}
+학생 문장: "${paraphraseInput.trim()}"`;
 
     try {
       const text = await generateText(prompt, {
@@ -933,6 +942,45 @@ Sentence: "${paraphraseInput.trim()}"`;
       );
     } finally {
       setParaphraseLoading(false);
+    }
+  };
+
+  const handleCompareRecommend = async () => {
+    if (!compareInput.trim() || compareLoading) return;
+    setCompareLoading(true);
+    setCompareError('');
+    setCompareRecommendation('');
+    setCompareReasons([]);
+    const userSentence = compareInput.trim();
+    const prompt = `You are a TOEIC paraphrasing coach.
+The user wrote this sentence in English:
+"${userSentence}"
+
+Your task:
+1) Write exactly ONE recommended alternative sentence in English that keeps the same meaning but uses natural TOEIC/business English style.
+2) Then on a new line write "이유:" and list 2-3 short reasons in Korean (한국어) why this phrasing is better. One reason per line, starting with - or a number.
+Do not use ** or any markdown. Output plain text only.`;
+
+    try {
+      const text = await generateText(prompt, {
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.3,
+        max_tokens: 400,
+      });
+      const raw = (text || '').trim().replace(/\*\*/g, '');
+      const reasonMatch = raw.match(/\n\s*이유\s*:\s*\n?([\s\S]*)/i);
+      const recommendation = reasonMatch ? raw.slice(0, raw.indexOf(reasonMatch[0])).trim() : raw;
+      const reasonsText = reasonMatch ? reasonMatch[1].trim() : '';
+      const reasons = reasonsText
+        .split(/\n+/)
+        .map((s) => s.replace(/^[\s\-•\d.)]+/, '').trim())
+        .filter(Boolean);
+      setCompareRecommendation(recommendation);
+      setCompareReasons(reasons.length > 0 ? reasons : []);
+    } catch (err) {
+      setCompareError(getFriendlyError(err, 'AI 추천 문장을 불러오지 못했어요.'));
+    } finally {
+      setCompareLoading(false);
     }
   };
 
@@ -1117,31 +1165,6 @@ ${historySummary}`;
     }
   };
 
-  const aiSentenceParts = [
-    { text: 'We ' },
-    {
-      text: 'regret',
-      highlight: true,
-      tooltip: '비즈니스 이메일에서 정중한 사과/유감 표현으로 자주 쓰입니다.',
-    },
-    { text: ' to ' },
-    {
-      text: 'inform',
-      highlight: true,
-      tooltip: 'TOEIC 빈출 공지 표현: inform you that ~ 형태가 자연스럽습니다.',
-    },
-    { text: ' you that the meeting has been ' },
-    {
-      text: 'postponed',
-      highlight: true,
-      tooltip: 'postpone은 공식 일정 변경 공지에 적합한 동사입니다.',
-    },
-    { text: '.' },
-  ];
-  const aiRecommendationReasons = aiSentenceParts
-    .filter((part) => part.highlight)
-    .map((part) => part.tooltip);
-
   const summaryCards = useMemo(() => {
     if (!classSummary) {
       return [
@@ -1210,9 +1233,9 @@ ${historySummary}`;
       }
 
       const prompt = `You are a TOEIC writing coach.
-Give concise feedback in Korean on the student's business document writing.
-Include: 1) 잘한 점 2) 개선할 점 3) 더 TOEIC스럽게 바꾼 예시 1개.
-학생 문장:
+Give concise feedback in English on the student's business document writing.
+Include in English: 1) What they did well 2) What to improve 3) One TOEIC-style rewritten example sentence.
+Student's sentence:
 ${editorText.trim()}`;
 
       const feedback = await generateText(prompt, {
@@ -1240,8 +1263,6 @@ ${editorText.trim()}`;
       setHistoryItems((prev) => [newItem, ...prev]);
       setHistoryLoaded(true);
       await refreshHistory(studentId);
-      setActiveView('student');
-      setActiveSection('history');
       setEditorSuccess('제출이 완료되었어요.');
     } catch (error) {
       console.error('Writing Submit Error:', error);
@@ -1490,7 +1511,7 @@ ${editorText.trim()}`;
             개인별 약점 보완까지 이어지는 학습 플랫폼입니다.
           </p>
         </div>
-        {studentId ? (
+        {studentId && activeView === 'student' ? (
           <div className="hero-rewards">
             <span className="reward-points">⭐ 내 포인트: {studentPoints}P</span>
             {studentBadges.length > 0 && (
@@ -1796,11 +1817,9 @@ ${editorText.trim()}`;
                 {teacherReportFromConverter ? (
                   <pre className="report-converter-content">{teacherReportFromConverter}</pre>
                 ) : (
-                  <ol>
-                    <li>시제/수일치 오류: 과거완료 vs 과거시제 구분</li>
-                    <li>전치사 선택: in/on/at의 시간 표현 규칙</li>
-                    <li>동의어 선택: inform/notify/advise 차이</li>
-                  </ol>
+                  <p className="report-converter-placeholder">
+                    교재 변환기에서 수업 자료를 업로드하면 여기에 핵심 내용이 표시됩니다.
+                  </p>
                 )}
               </div>
             </div>
@@ -2087,7 +2106,7 @@ ${editorText.trim()}`;
           {paraphraseOutput && (
             <div className="result-box">
               <h3>추천 대체 문장</h3>
-              <pre>{paraphraseOutput}</pre>
+              <pre>{paraphraseOutput.replace(/\*\*/g, '')}</pre>
             </div>
           )}
         </form>
@@ -2099,8 +2118,8 @@ ${editorText.trim()}`;
         <div className="section-header">
           <h2>Paraphrasing View</h2>
           <p>
-            개발자 코드 비교 화면처럼 좌측에는 내 문장, 우측에는 AI 추천 문장을
-            나란히 표시합니다.
+            좌측에 내 문장을 입력한 뒤 「추천 문장 받기」를 누르면, 입력한 문장을
+            기반으로 한 AI 추천 문장이 우측에 표시됩니다.
           </p>
         </div>
         <div className="card compare-card">
@@ -2117,52 +2136,37 @@ ${editorText.trim()}`;
                 onChange={(event) => setCompareInput(event.target.value)}
                 rows={6}
               />
+              <button
+                type="button"
+                onClick={handleCompareRecommend}
+                disabled={!compareInput.trim() || compareLoading}
+                style={{ marginTop: '10px' }}
+              >
+                {compareLoading ? '추천 받는 중...' : '추천 문장 받기'}
+              </button>
             </div>
             <div className="compare-panel">
               <p className="compare-text">
-                {compareInput.trim()
-                  ? aiSentenceParts.map((part, index) => {
-                      if (!part.highlight) {
-                        return <span key={index}>{part.text}</span>;
-                      }
-                      const isActive = activeTooltip === part.text;
-                      return (
-                        <span
-                          key={index}
-                          className={`highlight-word ${isActive ? 'active' : ''}`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() =>
-                            setActiveTooltip(isActive ? '' : part.text)
-                          }
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter') {
-                              setActiveTooltip(isActive ? '' : part.text);
-                            }
-                          }}
-                        >
-                          {part.text}
-                          {isActive && (
-                            <span className="tooltip">{part.tooltip}</span>
-                          )}
-                        </span>
-                      );
-                    })
-                  : '내 문장을 입력하면 AI 추천 문장이 표시됩니다.'}
+                {compareLoading
+                  ? 'AI 추천 문장을 생성하고 있어요...'
+                  : compareRecommendation
+                    ? compareRecommendation
+                    : '내 문장을 입력하고 「추천 문장 받기」를 누르면 여기에 표시됩니다.'}
               </p>
             </div>
           </div>
+          {compareError && <p className="error-text">{compareError}</p>}
           <div className="result-box">
             <h3>AI 추천 문장 이유</h3>
-            {compareInput.trim() ? (
+            {compareReasons.length > 0 ? (
               <ul className="explain-list">
-                {aiRecommendationReasons.map((reason) => (
-                  <li key={reason}>{reason}</li>
+                {compareReasons.map((reason, i) => (
+                  <li key={i}>{reason}</li>
                 ))}
               </ul>
             ) : (
               <p className="empty-text">
-                내 문장을 입력하면 AI 추천 이유가 함께 표시됩니다.
+                추천 문장을 받으면 여기에 이유가 표시됩니다.
               </p>
             )}
           </div>
@@ -2265,25 +2269,6 @@ ${editorText.trim()}`;
               <pre>{practiceOutput.replace(/\*\*/g, '')}</pre>
             </div>
           )}
-          <button
-            type="button"
-            className="ghost-btn"
-            disabled={!practiceOutput}
-            onClick={() => {
-              try {
-                sessionStorage.setItem(
-                  'miniQuizData',
-                  JSON.stringify({ quiz: miniQuiz, studentId: studentId || null })
-                );
-                const url = `${window.location.origin}${window.location.pathname.replace(/\/?$/, '')}/mini-quiz`;
-                window.open(url, 'miniQuiz', 'width=620,height=720,scrollbars=yes,resizable=yes');
-              } catch (e) {
-                console.error(e);
-              }
-            }}
-          >
-            약점 보완 미니 문제 풀기
-          </button>
         </div>
         {showWritingModal && (
           <div className="modal-overlay" onClick={() => setShowWritingModal(false)}>

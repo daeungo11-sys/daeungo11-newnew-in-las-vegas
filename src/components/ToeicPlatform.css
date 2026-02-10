@@ -522,6 +522,11 @@
   border-color: #1f2937;
 }
 
+[data-theme='dark'] .result-box h3,
+[data-theme='dark'] .result-box pre {
+  color: #ffffff;
+}
+
 /* 다크모드: 모달(약점 보완 미니 문제 등) 밝은 배경 + 검정 글씨로 가독성 확보 */
 [data-theme='dark'] .modal-card {
   background: #f8fafc;
@@ -887,10 +892,15 @@
   font-size: 13px;
   line-height: 1.6;
   white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 320px;
-  overflow-y: auto;
-  color: var(--color-text);
+}
+
+.report-converter-placeholder {
+  margin: 0;
+  padding: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-muted);
+  font-style: italic;
 }
 
 .study-grid {
