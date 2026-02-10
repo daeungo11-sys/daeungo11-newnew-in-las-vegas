@@ -523,6 +523,12 @@
   border-color: #1f2937;
 }
 
+/* 다크모드: 제출 내용 / AI 피드백 흰색 글씨로 표시 */
+[data-theme='dark'] .result-box-duo h3,
+[data-theme='dark'] .result-box-duo pre {
+  color: #ffffff;
+}
+
 .entry-section {
   max-width: 960px;
   margin: 0 auto;
